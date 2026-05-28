@@ -2,36 +2,40 @@ using UnityEngine;
 
 namespace ProjectWitchcraft.Core
 {
+    // Manages per-object transparency without modifying shared materials.
+    // Uses a single material instance for the transparent state and the
+    // shared material for the opaque state. MaterialPropertyBlock handles
+    // per-frame alpha changes so no extra allocations occur during placement.
     public class VisualsController : MonoBehaviour
     {
-        // We no longer need to assign the transparent material here,
-        // as the script will create it correctly at runtime.
-
         private Renderer _renderer;
-        private Material _originalMaterial;
-        private Material _transparentMaterialInstance;
+        private Material _sharedMaterial;
+        private Material _transparentInstance;
+        private MaterialPropertyBlock _propertyBlock;
 
-        // Cache the Shader Property IDs for performance.
-        private static readonly int ColorProperty = Shader.PropertyToID("_BaseColor");
+        private static readonly int BaseColorProperty = Shader.PropertyToID("_BaseColor");
 
         private void Awake()
         {
             _renderer = GetComponent<Renderer>();
+            if (_renderer == null) return;
 
-            if (_renderer != null)
-            {
-                // Store the object's original, opaque material.
-                _originalMaterial = _renderer.sharedMaterial;
+            _propertyBlock = new MaterialPropertyBlock();
+            _sharedMaterial = _renderer.sharedMaterial;
 
-                // Create a unique, transparent instance of the original material.
-                _transparentMaterialInstance = new Material(_originalMaterial);
-                _transparentMaterialInstance.SetFloat("_Surface", 1); // Set to Transparent
-                _transparentMaterialInstance.SetFloat("_ZWrite", 0);
-                _transparentMaterialInstance.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                _transparentMaterialInstance.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                _transparentMaterialInstance.SetOverrideTag("RenderType", "Transparent");
-                _transparentMaterialInstance.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-            }
+            _transparentInstance = new Material(_sharedMaterial);
+            _transparentInstance.SetFloat("_Surface", 1);
+            _transparentInstance.SetFloat("_ZWrite", 0);
+            _transparentInstance.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            _transparentInstance.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            _transparentInstance.SetOverrideTag("RenderType", "Transparent");
+            _transparentInstance.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+        }
+
+        private void OnDestroy()
+        {
+            if (_transparentInstance != null)
+                Destroy(_transparentInstance);
         }
 
         public void SetIsTransparent(bool isTransparent, float alpha = 0.5f)
@@ -40,21 +44,17 @@ namespace ProjectWitchcraft.Core
 
             if (isTransparent)
             {
-                // **THE DEFINITIVE FIX**:
-                // 1. Get the original color from the original material.
-                Color color = _originalMaterial.color;
-                // 2. Set the alpha on that color.
+                _renderer.sharedMaterial = _transparentInstance;
+                _renderer.GetPropertyBlock(_propertyBlock);
+                Color color = _sharedMaterial.GetColor(BaseColorProperty);
                 color.a = alpha;
-                // 3. Apply the color with the new alpha to our transparent material instance.
-                _transparentMaterialInstance.SetColor(ColorProperty, color);
-
-                // 4. Switch the renderer to use the transparent material.
-                _renderer.material = _transparentMaterialInstance;
+                _propertyBlock.SetColor(BaseColorProperty, color);
+                _renderer.SetPropertyBlock(_propertyBlock);
             }
             else
             {
-                // Switch back to the original, opaque material.
-                _renderer.material = _originalMaterial;
+                _renderer.sharedMaterial = _sharedMaterial;
+                _renderer.SetPropertyBlock(null);
             }
         }
 
@@ -62,10 +62,9 @@ namespace ProjectWitchcraft.Core
         {
             if (_renderer == null) return;
 
-            _originalMaterial.color = newColor;
-
-            // Also update the transparent instance's color so it matches when we switch.
-            _transparentMaterialInstance.color = newColor;
+            _renderer.GetPropertyBlock(_propertyBlock);
+            _propertyBlock.SetColor(BaseColorProperty, newColor);
+            _renderer.SetPropertyBlock(_propertyBlock);
         }
     }
 }

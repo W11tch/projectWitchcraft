@@ -50,7 +50,6 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         else
         {
             s_instance = this as T;
-            Debug.Log($"[Singleton] The single instance of type '{typeof(T).Name}' has been set to the one on GameObject '{this.gameObject.name}'. It will not be destroyed on load.", this.gameObject);
             DontDestroyOnLoad(gameObject);
         }
     }

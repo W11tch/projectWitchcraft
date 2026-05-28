@@ -1,8 +1,7 @@
 // Located at: Assets/Scripts/Managers/ObjectPooler.cs
 using System.Collections.Generic;
 using UnityEngine;
-using ProjectWitchcraft.Core; // Added to use IPoolableObject
-using ProjectWitchcraft.BuildingSystem; // **FIX**: Added this using statement.
+using ProjectWitchcraft.Core;
 
 namespace ProjectWitchcraft.Managers
 {
@@ -109,9 +108,7 @@ namespace ProjectWitchcraft.Managers
         {
             if (objectToReturn == null) return;
 
-            // **THE FIX**: Instead of getting the generic interface, we get the specific PlaceableObject component.
-            // This is a more direct and reliable way to find the script and its PoolTag.
-            var poolable = objectToReturn.GetComponent<PlaceableObject>();
+            var poolable = objectToReturn.GetComponent<IPoolableObject>();
 
             if (poolable != null && _poolDictionary.ContainsKey(poolable.PoolTag))
             {
@@ -120,9 +117,10 @@ namespace ProjectWitchcraft.Managers
             }
             else
             {
-                // The warning message is now more descriptive to help with future debugging.
-                string tagInfo = poolable != null ? $"with tag '{poolable.PoolTag}'" : "because it is missing the PlaceableObject component";
-                Debug.LogWarning($"Object {objectToReturn.name} {tagInfo} could not be returned to a pool and will be destroyed instead.");
+                string tagInfo = poolable != null
+                    ? $"with tag '{poolable.PoolTag}' (no matching pool)"
+                    : "missing IPoolableObject component";
+                Debug.LogError($"[ObjectPooler] Cannot return '{objectToReturn.name}' to pool — {tagInfo}. Destroying instead.");
                 Destroy(objectToReturn);
             }
         }

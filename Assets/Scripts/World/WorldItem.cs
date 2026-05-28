@@ -7,9 +7,13 @@ using System.Collections;
 namespace ProjectWitchcraft.World
 {
     [RequireComponent(typeof(SphereCollider))]
-    public class WorldItem : MonoBehaviour
+    public class WorldItem : MonoBehaviour, IPoolableObject
     {
         private enum ItemState { Animating, Idle, Attracted }
+
+        [Header("Pool")]
+        [SerializeField] private string _poolTag;
+        public string PoolTag => _poolTag;
 
         [Header("Dependencies")]
         [SerializeField] private SpriteRenderer _iconSpriteRenderer;
@@ -51,9 +55,13 @@ namespace ProjectWitchcraft.World
 
         private void OnEnable()
         {
-            // Reset scale on enable to ensure pooled objects don't keep old scales.
             if (_iconTransform != null) _iconTransform.localScale = Vector3.one;
             StartCoroutine(AnimateLifecycle());
+        }
+
+        private void OnDisable()
+        {
+            StopAllCoroutines();
         }
 
         public void Initialize(ItemData itemData, int quantity)
@@ -87,11 +95,7 @@ namespace ProjectWitchcraft.World
 
 
             if (_playerTransform == null)
-            {
-                var playerObject = GameObject.FindGameObjectWithTag("Player");
-                if (playerObject != null)
-                    _playerTransform = playerObject.transform;
-            }
+                _playerTransform = GameReferences.Instance.PlayerTransform;
         }
 
         private IEnumerator AnimateLifecycle()

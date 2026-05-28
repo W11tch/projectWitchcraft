@@ -1,8 +1,16 @@
 // Located at: Assets/Scripts/Core/GameEvents.cs
 namespace ProjectWitchcraft.Core
 {
-    // The GameState enum now lives here, in the Core assembly.
-    public enum GameState { PreGame, Playing, Paused, InMenu }
+    public enum GameState
+    {
+        Loading,    // scene loading / world gen — no player input
+        Playing,    // normal exploration
+        Building,   // placement mode active, player can still move
+        InMenu,     // any UI panel open (inventory, chest, etc.)
+        Combat,     // reserved for future combat-specific behaviour
+        Paused,     // Time.timeScale = 0
+        Cinematic,  // cutscene — all input suppressed
+    }
 
     // Defines the reason why the game entered the InMenu state.
     public enum MenuContext

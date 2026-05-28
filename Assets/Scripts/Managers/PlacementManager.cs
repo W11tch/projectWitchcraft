@@ -2,10 +2,10 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using System.Collections;
 using ProjectWitchcraft.BuildingSystem;
 using ProjectWitchcraft.Core;
 using UnityEngine.InputSystem;
-using System.Collections; // Added for IEnumerator
 
 namespace ProjectWitchcraft.Managers
 {
@@ -13,7 +13,7 @@ namespace ProjectWitchcraft.Managers
     {
         [Header("Dependencies")]
         public ObjectPooler objectPooler;
-        [SerializeField] private WorldGridManager worldGridManager;
+        [SerializeField] private ChunkManager worldGridManager;
         [SerializeField] private InventoryManager inventoryManager;
         [Header("Configuration")]
         [SerializeField] private Transform placedObjectsParent;
@@ -31,7 +31,7 @@ namespace ProjectWitchcraft.Managers
         protected override void Awake()
         {
             base.Awake();
-            _mainCamera = Camera.main;
+            _mainCamera = GameReferences.Instance.MainCamera;
             _previewLayer = LayerMask.NameToLayer("Preview");
         }
         private void OnEnable()
@@ -181,7 +181,6 @@ namespace ProjectWitchcraft.Managers
                     var gridData = worldGridManager.GetGridData(objToDestroy.transform.position);
                     if (gridData != null && gridData.groundObject == objToDestroy && gridData.upperObject != null)
                     {
-                        Debug.Log("Cannot destroy object: another object is on top.");
                         return;
                     }
 

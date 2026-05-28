@@ -1,10 +1,10 @@
 // Located at: Assets/Scripts/BuildingSystem/PlaceableObject.cs
 using UnityEngine;
-using ProjectWitchcraft.Core; // Added for PlaceableItemData
+using ProjectWitchcraft.Core;
 
 namespace ProjectWitchcraft.BuildingSystem
 {
-    public class PlaceableObject : MonoBehaviour
+    public class PlaceableObject : MonoBehaviour, IPoolableObject
     {
         [SerializeField] private PlaceableItemData itemData;
         public Vector3Int Size { get; private set; }

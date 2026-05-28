@@ -16,6 +16,7 @@ MonoBehaviour:
   Icon: {fileID: -1379421901, guid: ef53535d5fda9434db042146c3f177f9, type: 3}
   maxStackSize: 9999
   description: A small chest.
+  _assetGuid: 97ec10db014530946bc8a6684d725ab7
   placedPrefab: {fileID: 5005474774198865140, guid: c36e05c383352ae45b6a85714e94a995, type: 3}
   size: {x: 1, y: 1}
   placementRules:

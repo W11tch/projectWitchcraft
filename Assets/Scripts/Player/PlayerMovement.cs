@@ -23,7 +23,7 @@ namespace ProjectWitchcraft.Player
 
         private CharacterController _characterController;
         private PlayerController _playerController;
-        private WorldGridManager _worldGridManager;
+        private ChunkManager _worldGridManager;
         private Vector3 _playerVelocity;
         private CharacterStats _characterStats;
 
@@ -31,17 +31,14 @@ namespace ProjectWitchcraft.Player
         {
             _characterController = GetComponent<CharacterController>();
             _playerController = GetComponent<PlayerController>();
-            // Get the CharacterStats component attached to the player.
             _characterStats = GetComponent<CharacterStats>();
             if (_characterStats == null)
-            {
                 Debug.LogError("PlayerMovement requires a CharacterStats component, but none was found.", this);
-            }
         }
 
         private void Start()
         {
-            _worldGridManager = WorldGridManager.Instance;
+            _worldGridManager = ChunkManager.Instance;
         }
 
         private void OnEnable()
@@ -118,7 +115,10 @@ namespace ProjectWitchcraft.Player
 
         private void OnGameStateChanged(GameStateChangedEvent e)
         {
-            _isMovementFrozen = (e.NewState == GameState.Paused || e.NewState == GameState.InMenu);
+            _isMovementFrozen = e.NewState == GameState.Paused
+                || e.NewState == GameState.InMenu
+                || e.NewState == GameState.Loading
+                || e.NewState == GameState.Cinematic;
         }
     }
 }

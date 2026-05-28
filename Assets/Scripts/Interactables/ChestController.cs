@@ -1,4 +1,3 @@
-// Located at: Assets/Scripts/Interactables/ChestController.cs
 using UnityEngine;
 using System.Collections.Generic;
 using ProjectWitchcraft.Core;
@@ -6,7 +5,7 @@ using ProjectWitchcraft.Managers;
 
 namespace ProjectWitchcraft.Interactables
 {
-    public class ChestController : MonoBehaviour, IInteractable
+    public class ChestController : MonoBehaviour, IInteractable, IChestInventory
     {
         [Header("Settings")]
         [SerializeField] private string _chestName = "Chest";
@@ -19,33 +18,55 @@ namespace ProjectWitchcraft.Interactables
         {
             Inventory = new List<InventorySlot>(_inventorySize);
             for (int i = 0; i < _inventorySize; i++)
-            {
                 Inventory.Add(new InventorySlot());
-            }
 
-            // A simple way to give chests a unique ID for saving.
-            UniqueID = $"{transform.position.x}_{transform.position.y}_{transform.position.z}";
+            UniqueID = System.Guid.NewGuid().ToString();
         }
 
-        #region IInteractable Implementation
+        #region IInteractable
         public string InteractionPrompt => $"Open {_chestName}";
 
         public bool Interact()
         {
-
-            // Fire event for UI to open
             EventManager.TriggerEvent(new OpenContainerUIEvent
             {
                 ContainerName = _chestName,
                 ContainerInventory = this.Inventory
             });
-
-            // Set game state to InMenu to pause player actions
             GameManager.Instance.UpdateState(GameState.InMenu, MenuContext.Container);
-
-            Debug.Log($"Interacted with chest: {UniqueID}");
             return true;
         }
         #endregion
+
+        // Called by ChunkManager during save.
+        public ChestSaveData GetSaveData()
+        {
+            var data = new ChestSaveData { uniqueId = UniqueID };
+            foreach (var slot in Inventory)
+                data.slots.Add(new SlotData
+                {
+                    itemGuid = slot.IsEmpty ? "" : slot.item.AssetGuid,
+                    quantity = slot.quantity
+                });
+            return data;
+        }
+
+        // Called by ChunkManager during load.
+        public void ApplySaveData(ChestSaveData data, AssetRegistry registry)
+        {
+            UniqueID = data.uniqueId;
+            for (int i = 0; i < Inventory.Count && i < data.slots.Count; i++)
+            {
+                var slotData = data.slots[i];
+                if (string.IsNullOrEmpty(slotData.itemGuid) || slotData.quantity <= 0)
+                {
+                    Inventory[i].Clear();
+                    continue;
+                }
+                Inventory[i].item = registry.GetItemByGuid(slotData.itemGuid);
+                Inventory[i].quantity = slotData.quantity;
+                if (Inventory[i].item == null) Inventory[i].Clear();
+            }
+        }
     }
 }

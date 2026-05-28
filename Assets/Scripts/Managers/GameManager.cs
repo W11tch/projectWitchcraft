@@ -1,39 +1,63 @@
-// Located at: Assets/Scripts/Managers/GameManager.cs
+using System.Collections.Generic;
 using ProjectWitchcraft.Core;
 using UnityEngine;
 
 namespace ProjectWitchcraft.Managers
 {
-
     public class GameManager : Singleton<GameManager>
     {
-        public GameState CurrentState { get; private set; }
+        public GameState CurrentState { get; private set; } = GameState.Loading;
+
+        private static readonly HashSet<(GameState, GameState)> ValidTransitions = new()
+        {
+            (GameState.Loading,    GameState.Playing),
+
+            (GameState.Playing,    GameState.Building),
+            (GameState.Playing,    GameState.InMenu),
+            (GameState.Playing,    GameState.Combat),
+            (GameState.Playing,    GameState.Paused),
+            (GameState.Playing,    GameState.Cinematic),
+
+            (GameState.Building,   GameState.Playing),
+            (GameState.Building,   GameState.InMenu),
+            (GameState.Building,   GameState.Paused),
+
+            (GameState.InMenu,     GameState.Playing),
+            (GameState.InMenu,     GameState.Building),
+            (GameState.InMenu,     GameState.Paused),
+
+            (GameState.Combat,     GameState.Playing),
+            (GameState.Combat,     GameState.InMenu),
+            (GameState.Combat,     GameState.Paused),
+
+            (GameState.Paused,     GameState.Playing),
+            (GameState.Paused,     GameState.Building),
+            (GameState.Paused,     GameState.InMenu),
+
+            (GameState.Cinematic,  GameState.Playing),
+        };
 
         private void Start()
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-
             UpdateState(GameState.Playing);
         }
 
         public void UpdateState(GameState newState, MenuContext context = MenuContext.None)
         {
             if (CurrentState == newState) return;
+
+            if (!ValidTransitions.Contains((CurrentState, newState)))
+            {
+                Debug.LogError($"[GameManager] Invalid state transition: {CurrentState} → {newState}");
+                return;
+            }
+
             CurrentState = newState;
 
-            switch (newState)
-            {
-                case GameState.Playing:
-                    Time.timeScale = 1f;
-                    break;
-                case GameState.Paused:
-                    Time.timeScale = 0f;
-                    break;
-                case GameState.InMenu:
-                    Time.timeScale = 1f;
-                    break;
-            }
+            Time.timeScale = newState == GameState.Paused ? 0f : 1f;
+
             EventManager.TriggerEvent(new GameStateChangedEvent { NewState = newState, Context = context });
         }
     }

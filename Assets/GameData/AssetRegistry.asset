@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cba3bd271362334e871a1cb0e485abc, type: 3}
+  m_Name: AssetRegistry
+  m_EditorClassIdentifier: Core::ProjectWitchcraft.Core.AssetRegistry
+  _items: []
+  _placeables:
+  - {fileID: 11400000, guid: 5768fa8741a444f4886339f37c1013ab, type: 2}
+  - {fileID: 11400000, guid: ba3d4f92bfa3d5f44a00b96db937dcf6, type: 2}
+  - {fileID: 11400000, guid: a9b08447ef9c6dc4eb6ad3f30b6ca8a1, type: 2}
+  - {fileID: 11400000, guid: 97ec10db014530946bc8a6684d725ab7, type: 2}
+  - {fileID: 11400000, guid: 5ae63a89242c176488f79d28cc81f9be, type: 2}
+  - {fileID: 11400000, guid: 5eb856db9541dd34896875530427b729, type: 2}
+  - {fileID: 11400000, guid: f337731e5ec4ea44196c9504ca90babe, type: 2}

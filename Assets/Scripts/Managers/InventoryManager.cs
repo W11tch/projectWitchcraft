@@ -11,6 +11,7 @@ namespace ProjectWitchcraft.Managers
     {
         [Header("Data")]
         [SerializeField] private ItemDatabase itemDatabase;
+        [SerializeField] private AssetRegistry _assetRegistry;
         [Header("Settings")]
         [SerializeField] private int hotbarSize = 10;
         [SerializeField] private int inventorySize = 30;
@@ -61,17 +62,17 @@ namespace ProjectWitchcraft.Managers
         {
             if (_heldSlot.IsEmpty) return;
 
-            Transform playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
+            Transform playerTransform = GameReferences.Instance.PlayerTransform;
             if (playerTransform == null)
             {
-                Debug.LogError("Cannot drop item: Player not found.");
+                Debug.LogError("[InventoryManager] Cannot drop item: Player transform not registered in GameReferences.");
                 return;
             }
 
             Vector3 dropPosition;
             Vector3 playerPosition = playerTransform.position;
 
-            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+            Ray ray = GameReferences.Instance.MainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
 
             if (Physics.Raycast(ray, out RaycastHit hit, 100f, _groundLayer))
             {
@@ -282,46 +283,44 @@ namespace ProjectWitchcraft.Managers
 
         private void OnGatherSaveData(GatherSaveDataEvent e)
         {
-            e.SaveData.itemNames.Clear();
-            e.SaveData.itemAmounts.Clear();
+            e.SaveData.player.hotbar.Clear();
+            e.SaveData.player.inventory.Clear();
 
-            foreach (var slot in _hotbarSlots.Concat(_inventorySlots))
-            {
-                e.SaveData.itemNames.Add(slot.IsEmpty ? "" : slot.item.name);
-                e.SaveData.itemAmounts.Add(slot.quantity);
-            }
+            foreach (var slot in _hotbarSlots)
+                e.SaveData.player.hotbar.Add(MakeSlotData(slot));
+            foreach (var slot in _inventorySlots)
+                e.SaveData.player.inventory.Add(MakeSlotData(slot));
         }
+
+        private static SlotData MakeSlotData(InventorySlot slot) => new SlotData
+        {
+            itemGuid = slot.IsEmpty ? "" : slot.item.AssetGuid,
+            quantity = slot.quantity
+        };
+
         private void OnApplySaveData(ApplySaveDataEvent e)
         {
-            int totalSlots = hotbarSize + inventorySize;
-            if (e.SaveData.itemNames == null || e.SaveData.itemNames.Count != totalSlots)
+            if (_assetRegistry == null)
             {
-                Debug.LogWarning("Save data mismatch. Inventory could not be loaded.");
+                Debug.LogError("[InventoryManager] AssetRegistry not assigned. Cannot load inventory.");
                 return;
             }
 
-            for (int i = 0; i < hotbarSize; i++)
-            {
-                LoadSlotData(_hotbarSlots[i], e.SaveData.itemNames[i], e.SaveData.itemAmounts[i]);
-            }
-            for (int i = 0; i < inventorySize; i++)
-            {
-                LoadSlotData(_inventorySlots[i], e.SaveData.itemNames[hotbarSize + i], e.SaveData.itemAmounts[hotbarSize + i]);
-            }
-
+            ApplySlotList(_hotbarSlots, e.SaveData.player.hotbar);
+            ApplySlotList(_inventorySlots, e.SaveData.player.inventory);
             EventManager.TriggerEvent(new InventoryChangedEvent());
         }
-        private void LoadSlotData(InventorySlot slot, string itemName, int amount)
+
+        private void ApplySlotList(List<InventorySlot> slots, List<SlotData> dataList)
         {
-            if (string.IsNullOrEmpty(itemName) || amount <= 0)
+            for (int i = 0; i < slots.Count; i++)
             {
-                slot.Clear();
-            }
-            else
-            {
-                slot.item = itemDatabase.GetItemByName(itemName);
-                slot.quantity = amount;
-                if (slot.item == null) slot.Clear();
+                if (i >= dataList.Count) { slots[i].Clear(); continue; }
+                var data = dataList[i];
+                if (string.IsNullOrEmpty(data.itemGuid) || data.quantity <= 0) { slots[i].Clear(); continue; }
+                slots[i].item = _assetRegistry.GetItemByGuid(data.itemGuid);
+                slots[i].quantity = data.quantity;
+                if (slots[i].item == null) slots[i].Clear();
             }
         }
     }

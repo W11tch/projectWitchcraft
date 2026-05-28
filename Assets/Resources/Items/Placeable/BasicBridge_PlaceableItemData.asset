@@ -16,6 +16,7 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: 150116cda324c974394b65a7f0aa62ac, type: 3}
   maxStackSize: 9999
   description: 
+  _assetGuid: f337731e5ec4ea44196c9504ca90babe
   placedPrefab: {fileID: 1783564004933875948, guid: 704b041fdb4dcd5429f34d1e4f374eb7, type: 3}
   size: {x: 1, y: 1}
   placementRules:

@@ -1,73 +1,78 @@
-// Located at: Assets/Scripts/Managers/SaveManager.cs
 using UnityEngine;
 using ProjectWitchcraft.Core;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace ProjectWitchcraft.Managers
 {
     public class SaveManager : Singleton<SaveManager>
     {
         private string _savePath;
-        private const string SAVE_FILE_NAME = "savegame.json";
+        private const string SaveFileName = "savegame.json";
+
+        private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
+        {
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Ignore,
+        };
 
         protected override void Awake()
         {
             base.Awake();
-            _savePath = Path.Combine(Application.persistentDataPath, SAVE_FILE_NAME);
+            _savePath = Path.Combine(Application.persistentDataPath, SaveFileName);
         }
 
         private void OnEnable()
         {
-            EventManager.AddListener<SaveRequestEvent>(HandleSaveRequest);
-            EventManager.AddListener<LoadRequestEvent>(HandleLoadRequest);
+            EventManager.AddListener<SaveRequestEvent>(OnSaveRequested);
+            EventManager.AddListener<LoadRequestEvent>(OnLoadRequested);
         }
 
         private void OnDisable()
         {
-            EventManager.RemoveListener<SaveRequestEvent>(HandleSaveRequest);
-            EventManager.RemoveListener<LoadRequestEvent>(HandleLoadRequest);
+            EventManager.RemoveListener<SaveRequestEvent>(OnSaveRequested);
+            EventManager.RemoveListener<LoadRequestEvent>(OnLoadRequested);
         }
 
-        private void HandleSaveRequest(SaveRequestEvent e)
-        {
-            SaveGame();
-        }
-
-        private void HandleLoadRequest(LoadRequestEvent e)
-        {
-            LoadGame();
-        }
+        private void OnSaveRequested(SaveRequestEvent e) => SaveGame();
+        private void OnLoadRequested(LoadRequestEvent e) => LoadGame();
 
         public void SaveGame()
         {
-            Debug.Log("Saving game to: " + _savePath);
-            SaveData saveData = new SaveData();
-
+            var saveData = new SaveData();
             EventManager.TriggerEvent(new GatherSaveDataEvent { SaveData = saveData });
 
-            string json = JsonUtility.ToJson(saveData, true);
-            File.WriteAllText(_savePath, json);
-
-            EventManager.TriggerEvent(new GameSavedEvent());
-            Debug.Log("Game Saved!");
+            try
+            {
+                string json = JsonConvert.SerializeObject(saveData, JsonSettings);
+                File.WriteAllText(_savePath, json);
+                EventManager.TriggerEvent(new GameSavedEvent());
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[SaveManager] Save failed: {ex.Message}");
+            }
         }
 
         public void LoadGame()
         {
-            if (File.Exists(_savePath))
+            if (!File.Exists(_savePath)) return;
+
+            try
             {
-                Debug.Log("Loading game from: " + _savePath);
                 string json = File.ReadAllText(_savePath);
-                SaveData saveData = JsonUtility.FromJson<SaveData>(json);
-
+                var saveData = JsonConvert.DeserializeObject<SaveData>(json, JsonSettings);
+                if (saveData == null)
+                {
+                    Debug.LogError("[SaveManager] Deserialized save data is null.");
+                    return;
+                }
                 EventManager.TriggerEvent(new ApplySaveDataEvent { SaveData = saveData });
-
                 EventManager.TriggerEvent(new GameLoadedEvent());
-                Debug.Log("Game Loaded!");
             }
-            else
+            catch (System.Exception ex)
             {
-                Debug.LogWarning("No save file found to load.");
+                Debug.LogError($"[SaveManager] Load failed: {ex.Message}");
             }
         }
     }

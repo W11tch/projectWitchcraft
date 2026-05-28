@@ -30,14 +30,9 @@ namespace ProjectWitchcraft.Managers
 
         protected override void Awake()
         {
-            // --- DEBUG: Add a log here to catch duplicate instances ---
-            if (Instance != null && Instance != this)
-            {
-                Debug.LogWarning("DUPLICATE InteractionManager instance was created and is being destroyed.", this.gameObject);
-            }
             base.Awake();
-            _mainCamera = Camera.main;
-            _propertyBlock = new MaterialPropertyBlock(); // **NEW**: Initialize the property block.
+            _mainCamera = GameReferences.Instance.MainCamera;
+            _propertyBlock = new MaterialPropertyBlock();
         }
 
         private void OnEnable()
@@ -106,9 +101,6 @@ namespace ProjectWitchcraft.Managers
                 // Show outline on the new target, if it's valid
                 if (_currentTarget != null)
                 {
-                    // DEBUG: A new valid target has been acquired.
-                    Debug.Log($"New interactable target acquired: {((MonoBehaviour)_currentTarget).name}");
-                    // Try to get the Renderer from the hit collider's GameObject.
                     _currentTargetRenderer = hit.collider.GetComponentInChildren<Renderer>();
                     ToggleOutline(true);
                 }
@@ -118,20 +110,7 @@ namespace ProjectWitchcraft.Managers
 
         private void OnInteractPressed(InteractActionTriggeredEvent e)
         {
-            // DEBUG: Check if the 'E' key press is being received by the manager.
-            Debug.Log("InteractionManager received InteractActionTriggeredEvent!");
-
-            if (_currentTarget != null)
-            {
-                // DEBUG: A valid target exists, attempting to interact.
-                Debug.Log($"Attempting to interact with {_currentTarget}.");
-                _currentTarget.Interact();
-            }
-            else
-            {
-                // DEBUG: 'E' was pressed, but no valid target was being hovered over.
-                Debug.Log("Interact pressed, but no target was found by InteractionManager.");
-            }
+            _currentTarget?.Interact();
         }
 
         private void ToggleOutline(bool show)

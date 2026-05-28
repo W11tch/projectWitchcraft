@@ -18,16 +18,10 @@ namespace ProjectWitchcraft.Player
 
         public void OnAttack(InputAction.CallbackContext context)
         {
-            if (context.performed)
-            {
-                Debug.Log("Attack action performed.");
-            }
         }
 
         public void OnInteract(InputAction.CallbackContext context)
         {
-            // --- MODIFIED DEBUG LINE ---
-            Debug.Log($"OnInteract called. Current Game State is: {GameManager.Instance.CurrentState}");
             if (!context.performed) return;
 
             // If a menu is open, the interact key should close it.
@@ -45,7 +39,8 @@ namespace ProjectWitchcraft.Player
         // This method is now connected to the new hotbar system.
         public void OnSelectHotbarSlot(InputAction.CallbackContext context)
         {
-            if (GameManager.Instance.CurrentState != GameState.Playing || !context.performed) return;
+            var state = GameManager.Instance.CurrentState;
+            if ((state != GameState.Playing && state != GameState.Building) || !context.performed) return;
 
             if (int.TryParse(context.control.name, out int keyNumber))
             {
@@ -64,10 +59,6 @@ namespace ProjectWitchcraft.Player
                 if (slot.item is PlaceableItemData placeableItem)
                 {
                     EventManager.TriggerEvent(new PlacementModeRequestedEvent { ItemData = placeableItem });
-                }
-                else
-                {
-                    Debug.Log($"Selected non-placeable item: {slot.item.Name}");
                 }
             }
         }

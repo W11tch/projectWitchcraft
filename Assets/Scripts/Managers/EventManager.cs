@@ -28,9 +28,6 @@ public static class EventManager
         {
             s_events[eventType] = listener;
         }
-
-        // --- DEBUG: Log when a listener is added ---
-        Debug.Log($"[EventManager] Listener for event '{eventType.Name}' added from method '{listener.Method.Name}' in class '{listener.Method.DeclaringType.Name}'.");
     }
 
     /// <summary>
@@ -53,9 +50,6 @@ public static class EventManager
             {
                 s_events[eventType] = newDelegate;
             }
-
-            // --- DEBUG: Log when a listener is removed ---
-            Debug.Log($"[EventManager] Listener for event '{eventType.Name}' removed from method '{listener.Method.Name}' in class '{listener.Method.DeclaringType.Name}'.");
         }
     }
 
@@ -69,11 +63,6 @@ public static class EventManager
         if (s_events.TryGetValue(typeof(T), out var existingDelegate) && existingDelegate is Action<T> action)
         {
             action.Invoke(eventArgs);
-        }
-        else
-        {
-            // --- DEBUG: Log if an event is triggered with no listeners ---
-            Debug.LogWarning($"[EventManager] Event '{typeof(T).Name}' was triggered, but has no listeners.");
         }
     }
 }
