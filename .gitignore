@@ -26,6 +26,7 @@ sysinfo.txt
 *.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
 *.tmp
 *.user
@@ -38,6 +39,17 @@ sysinfo.txt
 *.opendb
 *.VC.db
 ExportedObj/
+.vsconfig
+
+# Plastic SCM
+plastic.workspace
+plastic.selector
+plastic.wktree
+plastic.changes
+ignore.conf
+
+# Claude Code
+.claudeignore
 
 # VS Code
 .vscode/
