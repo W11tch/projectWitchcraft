@@ -22,7 +22,6 @@ namespace ProjectWitchcraft.World
 
         [Header("Configuration")]
         [SerializeField] private float _pickupDistance = 0.5f;
-        // **FIX**: This new field will control the final size of ALL dropped items.
         [Tooltip("The desired size (width) of the dropped item's sprite in world units.")]
         [SerializeField] private float _droppedItemWorldSize = 0.5f;
 
@@ -30,8 +29,12 @@ namespace ProjectWitchcraft.World
         [SerializeField] private LayerMask _groundLayer;
         [SerializeField] private float _raycastDistance = 5f;
 
-        [Header("Bounce Animation")]
+        [Header("Drop Animation")]
+        [Tooltip("Height (in local units) the icon starts at when dropped by the player.")]
+        [SerializeField] private float _dropHeight = 1.5f;
         [SerializeField] private float _dropDuration = 0.2f;
+
+        [Header("Bounce Animation")]
         [SerializeField] private float _bounceHeight = 0.5f;
         [SerializeField] private float _bounceDuration = 0.5f;
         [SerializeField] private float _floatHeight = 0.25f;
@@ -52,8 +55,8 @@ namespace ProjectWitchcraft.World
 
         private void OnEnable()
         {
+            // Reset visual state only — animation is started by Initialize / InitializeFromSave.
             if (_iconTransform != null) _iconTransform.localScale = Vector3.one;
-            StartCoroutine(AnimateLifecycle());
         }
 
         private void OnDisable()
@@ -61,41 +64,90 @@ namespace ProjectWitchcraft.World
             StopAllCoroutines();
         }
 
-        public void Initialize(ItemData itemData, int quantity)
+        // Called by WorldItemSpawner for normal player drops.
+        public void Initialize(ItemData itemData, int quantity, bool playerDrop = false)
+        {
+            SetupVisuals(itemData, quantity);
+            _currentState = ItemState.Animating;
+            StopAllCoroutines();
+            StartCoroutine(playerDrop ? AnimateDropFromAbove() : AnimatePopFromGround());
+        }
+
+        // Called by WorldItemSpawner when restoring items from a save file.
+        public void InitializeFromSave(ItemData itemData, int quantity)
+        {
+            SetupVisuals(itemData, quantity);
+            if (_iconSpriteRenderer != null) _iconSpriteRenderer.enabled = true;
+            if (_shadowSpriteRenderer != null) _shadowSpriteRenderer.enabled = true;
+            if (_iconTransform != null) _iconTransform.localPosition = new Vector3(0, _floatHeight, 0);
+            _currentState = ItemState.Idle;
+        }
+
+        private void SetupVisuals(ItemData itemData, int quantity)
         {
             ItemData = itemData;
             Quantity = quantity;
+
+            if (_playerTransform == null)
+                _playerTransform = GameReferences.Instance.PlayerTransform;
 
             if (_iconSpriteRenderer != null)
             {
                 _iconSpriteRenderer.sprite = itemData.Icon;
 
-                // **THE DEFINITIVE FIX**: This new logic normalizes the scale of all sprites.
                 if (itemData.Icon != null && itemData.Icon.pixelsPerUnit > 0)
                 {
-                    // 1. Calculate the sprite's original size in world units.
-                    //    (e.g., a 32px sprite with 32 PPU is 1 unit wide).
-                    //    (e.g., a 64px sprite with 64 PPU is 1 unit wide).
                     float originalWorldWidth = itemData.Icon.rect.width / itemData.Icon.pixelsPerUnit;
-
-                    // 2. Calculate the scale needed to make it match our target size.
-                    //    (e.g., for both sprites above, this would be 0.5 / 1.0 = 0.5).
                     float scaleMultiplier = _droppedItemWorldSize / originalWorldWidth;
-
-                    // 3. Apply the final, normalized scale.
                     if (_iconTransform != null)
-                    {
                         _iconTransform.localScale = Vector3.one * scaleMultiplier;
-                    }
                 }
             }
-
-
-            if (_playerTransform == null)
-                _playerTransform = GameReferences.Instance.PlayerTransform;
         }
 
-        private IEnumerator AnimateLifecycle()
+        // Player-drop animation: icon falls from above, root stays at ground position.
+        private IEnumerator AnimateDropFromAbove()
+        {
+            if (_iconSpriteRenderer != null) _iconSpriteRenderer.enabled = false;
+            if (_shadowSpriteRenderer != null) _shadowSpriteRenderer.enabled = false;
+
+            yield return null;
+
+            if (_iconSpriteRenderer != null) _iconSpriteRenderer.enabled = true;
+            if (_shadowSpriteRenderer != null) _shadowSpriteRenderer.enabled = true;
+
+            // Fall: icon drops from _dropHeight to _floatHeight with a gravity ease-in.
+            float elapsed = 0f;
+            while (elapsed < _dropDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / _dropDuration);
+                float height = Mathf.Lerp(_dropHeight, _floatHeight, t * t);
+                if (_iconTransform != null)
+                    _iconTransform.localPosition = new Vector3(0, height, 0);
+                yield return null;
+            }
+
+            // Bounce.
+            elapsed = 0f;
+            while (elapsed < _bounceDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / _bounceDuration;
+                float height = _floatHeight + Mathf.Sin(t * Mathf.PI) * _bounceHeight;
+                if (_iconTransform != null)
+                    _iconTransform.localPosition = new Vector3(0, height, 0);
+                yield return null;
+            }
+
+            if (_iconTransform != null)
+                _iconTransform.localPosition = new Vector3(0, _floatHeight, 0);
+            _currentState = ItemState.Idle;
+        }
+
+        // Preserved for future use (e.g. loot spawning from enemies).
+        // Root object moves from spawn position down to the ground surface, then bounces.
+        private IEnumerator AnimatePopFromGround()
         {
             _currentState = ItemState.Animating;
 
@@ -108,9 +160,7 @@ namespace ProjectWitchcraft.World
             Vector3 groundPosition = spawnPosition;
 
             if (Physics.Raycast(spawnPosition, Vector3.down, out RaycastHit hit, _raycastDistance, _groundLayer))
-            {
                 groundPosition = hit.point;
-            }
 
             if (_iconSpriteRenderer != null) _iconSpriteRenderer.enabled = true;
             if (_shadowSpriteRenderer != null) _shadowSpriteRenderer.enabled = true;
@@ -129,20 +179,14 @@ namespace ProjectWitchcraft.World
             {
                 elapsedTime += Time.deltaTime;
                 float t = elapsedTime / _bounceDuration;
-
-                float height = _floatHeight + (Mathf.Sin(t * Mathf.PI) * _bounceHeight);
+                float height = _floatHeight + Mathf.Sin(t * Mathf.PI) * _bounceHeight;
                 if (_iconTransform != null)
-                {
                     _iconTransform.localPosition = new Vector3(0, height, 0);
-                }
-
                 yield return null;
             }
 
             if (_iconTransform != null)
-            {
                 _iconTransform.localPosition = new Vector3(0, _floatHeight, 0);
-            }
             _currentState = ItemState.Idle;
         }
 
@@ -154,17 +198,13 @@ namespace ProjectWitchcraft.World
             transform.position += directionToPlayer * _attractionSpeed * Time.deltaTime;
 
             if (Vector3.Distance(transform.position, _playerTransform.position) < _pickupDistance)
-            {
                 TryPickup();
-            }
         }
 
         private void OnTriggerEnter(Collider other)
         {
             if (_currentState == ItemState.Idle && other.CompareTag("Player"))
-            {
                 _currentState = ItemState.Attracted;
-            }
         }
 
         private void TryPickup()

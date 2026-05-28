@@ -10,6 +10,7 @@ namespace ProjectWitchcraft.Core
         public int version = 2;
         public PlayerSaveData player = new PlayerSaveData();
         public List<ObjectData> placedObjects = new List<ObjectData>();
+        public List<WorldItemSaveData> worldItems = new List<WorldItemSaveData>();
     }
 
     [System.Serializable]
@@ -58,5 +59,20 @@ namespace ProjectWitchcraft.Core
     {
         public string uniqueId;
         public List<SlotData> slots = new List<SlotData>();
+    }
+
+    [System.Serializable]
+    public class WorldItemSaveData
+    {
+        public string itemGuid;
+        public int quantity;
+        public float px, py, pz;
+
+        [JsonIgnore]
+        public Vector3 Position
+        {
+            get => new Vector3(px, py, pz);
+            set { px = value.x; py = value.y; pz = value.z; }
+        }
     }
 }

@@ -76,17 +76,16 @@ namespace ProjectWitchcraft.Managers
 
             if (Physics.Raycast(ray, out RaycastHit hit, 100f, _groundLayer))
             {
-                // Calculate direction from player to mouse
-                Vector3 direction = (hit.point - playerPosition).normalized;
-                // We only care about the horizontal direction.
-                direction.y = 0;
-
-                // The drop position is a fixed distance from the player in that direction.
-                dropPosition = playerPosition + direction * _dropDistance;
+                // Drop at cursor position, clamped to _dropDistance from the player.
+                Vector3 toHit = hit.point - playerPosition;
+                toHit.y = 0;
+                dropPosition = toHit.magnitude > _dropDistance
+                    ? playerPosition + toHit.normalized * _dropDistance
+                    : hit.point;
             }
             else
             {
-                // Fallback: If pointing at the sky, drop in front of the player.
+                // Fallback: cursor pointing at sky — drop in front of the player.
                 Vector3 forwardDirection = playerTransform.forward;
                 forwardDirection.y = 0;
                 dropPosition = playerPosition + forwardDirection.normalized * _dropDistance;
