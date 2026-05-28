@@ -18,6 +18,14 @@ namespace ProjectWitchcraft.Core
     {
         public List<SlotData> hotbar = new List<SlotData>();
         public List<SlotData> inventory = new List<SlotData>();
+        public float px, py, pz;
+
+        [JsonIgnore]
+        public Vector3 Position
+        {
+            get => new Vector3(px, py, pz);
+            set { px = value.x; py = value.y; pz = value.z; }
+        }
     }
 
     // One inventory slot — empty when itemGuid is null/empty.

@@ -47,12 +47,29 @@ namespace ProjectWitchcraft.Player
         {
             EventManager.AddListener<ToggleFlyModeEvent>(OnToggleFlyMode);
             EventManager.AddListener<GameStateChangedEvent>(OnGameStateChanged);
+            EventManager.AddListener<GatherSaveDataEvent>(OnGatherSaveData);
+            EventManager.AddListener<ApplySaveDataEvent>(OnApplySaveData);
         }
 
         private void OnDisable()
         {
             EventManager.RemoveListener<ToggleFlyModeEvent>(OnToggleFlyMode);
             EventManager.RemoveListener<GameStateChangedEvent>(OnGameStateChanged);
+            EventManager.RemoveListener<GatherSaveDataEvent>(OnGatherSaveData);
+            EventManager.RemoveListener<ApplySaveDataEvent>(OnApplySaveData);
+        }
+
+        private void OnGatherSaveData(GatherSaveDataEvent e)
+        {
+            e.SaveData.player.Position = transform.position;
+        }
+
+        private void OnApplySaveData(ApplySaveDataEvent e)
+        {
+            _characterController.enabled = false;
+            transform.position = e.SaveData.player.Position;
+            _characterController.enabled = true;
+            _playerVelocity = Vector3.zero;
         }
 
         private void OnToggleFlyMode(ToggleFlyModeEvent e)

@@ -12,7 +12,7 @@ namespace ProjectWitchcraft.Managers
     {
         [Header("Dependencies")]
         public ObjectPooler objectPooler;
-        [SerializeField] private ChunkManager worldGridManager;
+        [SerializeField] private ChunkManager _chunkManager;
         [SerializeField] private InventoryManager inventoryManager;
         [Header("Configuration")]
         [SerializeField] private Transform placedObjectsParent;
@@ -135,7 +135,7 @@ namespace ProjectWitchcraft.Managers
                 finalObject.GetComponent<VisualsController>()?.SetIsTransparent(false);
                 finalObject.Placed = true;
 
-                worldGridManager.PlaceObject(finalObject);
+                _chunkManager.PlaceObject(finalObject);
 
                 finalObject.ActivateColliderSafely();
             }
@@ -163,13 +163,13 @@ namespace ProjectWitchcraft.Managers
                 var objToDestroy = hit.collider.GetComponentInParent<PlaceableObject>();
                 if (objToDestroy != null)
                 {
-                    var gridData = worldGridManager.GetGridData(objToDestroy.transform.position);
+                    var gridData = _chunkManager.GetGridData(objToDestroy.transform.position);
                     if (gridData != null && gridData.groundObject == objToDestroy && gridData.upperObject != null)
                     {
                         return;
                     }
 
-                    worldGridManager.RemoveObject(objToDestroy);
+                    _chunkManager.RemoveObject(objToDestroy);
                     objectPooler.ReturnToPool(objToDestroy.gameObject);
                 }
             }
@@ -193,7 +193,7 @@ namespace ProjectWitchcraft.Managers
                 return;
             }
 
-            Vector3 snappedPos = worldGridManager.SnapToGrid(mousePos.Value, _previewObject.Size);
+            Vector3 snappedPos = _chunkManager.SnapToGrid(mousePos.Value, _previewObject.Size);
             Vector3? finalPreviewPosition = GetPreviewPosition(snappedPos);
 
             if (finalPreviewPosition == null)
@@ -212,7 +212,7 @@ namespace ProjectWitchcraft.Managers
             if (_currentItemData == null) return snappedPos;
 
             var rules = _currentItemData.placementRules;
-            List<Vector2Int> gridPositions = worldGridManager.GetGridPositionsForObject(snappedPos, _previewObject.Size);
+            List<Vector2Int> gridPositions = _chunkManager.GetGridPositionsForObject(snappedPos, _previewObject.Size);
 
             bool placeOnUpper = (rules.Layer == PlacementLayer.Upper);
             if (rules.Layer == PlacementLayer.Any)
@@ -220,7 +220,7 @@ namespace ProjectWitchcraft.Managers
                 bool canBeUpper = true;
                 foreach (var pos in gridPositions)
                 {
-                    if (worldGridManager.GetGridData(pos)?.groundObject == null)
+                    if (_chunkManager.GetGridData(pos)?.groundObject == null)
                     {
                         canBeUpper = false;
                         break;
@@ -234,7 +234,7 @@ namespace ProjectWitchcraft.Managers
                 float highestPoint = float.MinValue;
                 foreach (var pos in gridPositions)
                 {
-                    GridCell cell = worldGridManager.GetGridData(pos);
+                    GridCell cell = _chunkManager.GetGridData(pos);
                     if (cell?.groundObject == null)
                         return null;
 
@@ -267,10 +267,10 @@ namespace ProjectWitchcraft.Managers
             if (_currentItemData == null || !inventoryManager.HasItem(_currentItemData, 1))
                 return false;
 
-            List<Vector2Int> gridPositions = worldGridManager.GetGridPositionsForObject(position, size);
+            List<Vector2Int> gridPositions = _chunkManager.GetGridPositionsForObject(position, size);
             foreach (var gridPos in gridPositions)
             {
-                GridCell cell = worldGridManager.GetGridData(gridPos);
+                GridCell cell = _chunkManager.GetGridData(gridPos);
                 var rules = _currentItemData.placementRules;
                 switch (rules.Layer)
                 {
