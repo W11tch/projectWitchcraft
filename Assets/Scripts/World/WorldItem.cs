@@ -39,9 +39,6 @@ namespace ProjectWitchcraft.World
         [Header("Attraction")]
         [SerializeField] private float _attractionSpeed = 8f;
 
-        // **FIX**: This is the new baseline for scaling. We assume 64 PPU is the "normal" size.
-        private const float BASE_PIXELS_PER_UNIT = 32f;
-
         public ItemData ItemData { get; private set; }
         public int Quantity { get; private set; }
 

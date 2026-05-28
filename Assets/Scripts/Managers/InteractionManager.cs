@@ -15,9 +15,6 @@ namespace ProjectWitchcraft.Managers
         [SerializeField] private LayerMask _interactableLayers; // **MODIFIED**: Changed from int to LayerMask
         [Tooltip("The thickness of the outline when an object is highlighted.")]
         [SerializeField] private float _outlineThickness = 0.05f;
-        [Tooltip("A reference to the player's transform.")]
-        [SerializeField] private Transform _playerTransform;
-
         private IInteractable _currentTarget;
         private Camera _mainCamera;
         private Renderer _currentTargetRenderer;
@@ -75,9 +72,9 @@ namespace ProjectWitchcraft.Managers
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, _interactableLayers))
             {
                 // Find the point on the object's collider that is closest to the player.
-                Vector3 closestPoint = hit.collider.ClosestPoint(_playerTransform.position);
+                Vector3 closestPoint = hit.collider.ClosestPoint(GameReferences.Instance.PlayerTransform.position);
                 // Now, check the distance from the player to that closest point.
-                if (Vector3.Distance(_playerTransform.position, closestPoint) <= _interactionDistance)
+                if (Vector3.Distance(GameReferences.Instance.PlayerTransform.position, closestPoint) <= _interactionDistance)
                 {
                     newTarget = hit.collider.GetComponent<IInteractable>();
                 }

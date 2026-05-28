@@ -1,4 +1,5 @@
 // Located at: Assets/Scripts/BuildingSystem/PlaceableObject.cs
+using System.Collections;
 using UnityEngine;
 using ProjectWitchcraft.Core;
 
@@ -39,17 +40,54 @@ namespace ProjectWitchcraft.BuildingSystem
             }
         }
 
+        private Collider _collider;
+
         private void Awake()
         {
-            // Get the component from this object or any of its children.
             _rotatableSprite = GetComponentInChildren<RotatableSprite>();
-
-            Collider objectCollider = GetComponent<Collider>();
-            if (objectCollider != null)
+            _collider = GetComponent<Collider>();
+            if (_collider != null)
             {
-                Vector3 size = objectCollider.bounds.size;
+                Vector3 size = _collider.bounds.size;
                 Size = new Vector3Int(Mathf.RoundToInt(size.x), Mathf.RoundToInt(size.y), Mathf.Max(1, Mathf.RoundToInt(size.z)));
             }
+        }
+
+        // Disables the collider and re-enables it only once the CharacterController is
+        // no longer intersecting the placed object's footprint. This prevents the
+        // CharacterController's depenetration from ejecting the player when an object
+        // spawns on or adjacent to them.
+        public void ActivateColliderSafely()
+        {
+            if (_collider != null)
+                StartCoroutine(EnableWhenPlayerClears());
+        }
+
+        private IEnumerator EnableWhenPlayerClears()
+        {
+            // Cache bounds before disabling — disabled colliders don't update bounds reliably.
+            Bounds placedBounds = _collider.bounds;
+            _collider.enabled = false;
+
+            var playerCC = GameReferences.Instance.PlayerTransform?.GetComponent<CharacterController>();
+            if (playerCC != null)
+            {
+                // Poll every physics frame until the CharacterController AABB no longer intersects.
+                // No cap: placement is already blocked when overlapping the player, so this coroutine
+                // only runs for adjacent placements that clear within a few frames.
+                while (true)
+                {
+                    Vector3 ccCenter = playerCC.transform.TransformPoint(playerCC.center);
+                    Bounds ccBounds = new Bounds(ccCenter,
+                        new Vector3(playerCC.radius * 2f, playerCC.height, playerCC.radius * 2f));
+
+                    if (!placedBounds.Intersects(ccBounds)) break;
+
+                    yield return new WaitForFixedUpdate();
+                }
+            }
+
+            _collider.enabled = true;
         }
 
         public void Rotate()

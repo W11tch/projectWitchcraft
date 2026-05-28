@@ -2,7 +2,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
-using System.Collections;
 using ProjectWitchcraft.BuildingSystem;
 using ProjectWitchcraft.Core;
 using UnityEngine.InputSystem;
@@ -25,7 +24,7 @@ namespace ProjectWitchcraft.Managers
         private bool _isPlacing = false;
         private int _previewLayer;
         private bool _isPointerOverUI = false;
-        private bool _isDestroyModeActive = true;
+        private bool _isDestroyModeActive = false;
         private bool _isFrozen = false;
         private Camera _mainCamera;
         protected override void Awake()
@@ -89,8 +88,7 @@ namespace ProjectWitchcraft.Managers
             _isPlacing = true;
             _currentItemData = itemData;
 
-            Vector3 initialSpawnPosition = new Vector3(0, -1000f, 0);
-            _previewObject = objectPooler.SpawnFromPool(_currentItemData.placedPrefab.name, initialSpawnPosition, Quaternion.identity).GetComponent<PlaceableObject>();
+            _previewObject = objectPooler.SpawnFromPool(_currentItemData.placedPrefab.name, Vector3.zero, Quaternion.identity).GetComponent<PlaceableObject>();
 
             if (_previewObject == null)
             {
@@ -103,6 +101,7 @@ namespace ProjectWitchcraft.Managers
                 child.gameObject.layer = _previewLayer;
             }
             _previewObject.GetComponent<VisualsController>()?.SetIsTransparent(true, 0.5f);
+            _previewObject.gameObject.SetActive(false);
 
             UpdatePreview();
         }
@@ -120,7 +119,7 @@ namespace ProjectWitchcraft.Managers
 
         private void HandlePlaceAction(PlaceActionTriggeredEvent e)
         {
-            if (_isFrozen || !_isPlacing || _isPointerOverUI || _previewObject == null) return;
+            if (_isFrozen || !_isPlacing || _isPointerOverUI || _previewObject == null || !_previewObject.gameObject.activeSelf) return;
 
             Vector3 finalPosition = _previewObject.transform.position;
             if (IsPlacementValid(finalPosition, _previewObject.Size))
@@ -138,21 +137,7 @@ namespace ProjectWitchcraft.Managers
 
                 worldGridManager.PlaceObject(finalObject);
 
-                // Temporarily disable the collider to prevent the physics bump.
-                StartCoroutine(EnableColliderAfterFrame(finalObject));
-            }
-        }
-
-        // This coroutine waits one frame, then re-enables the collider.
-        private IEnumerator EnableColliderAfterFrame(PlaceableObject obj)
-        {
-            Collider col = obj.GetComponent<Collider>();
-            if (col != null)
-            {
-                col.enabled = false;
-                // Wait until the end of the current frame.
-                yield return new WaitForEndOfFrame();
-                col.enabled = true;
+                finalObject.ActivateColliderSafely();
             }
         }
 
@@ -189,45 +174,49 @@ namespace ProjectWitchcraft.Managers
                 }
             }
         }
-        private Vector3 GetMouseWorldPosition()
+        private Vector3? GetMouseWorldPosition()
         {
             Ray ray = _mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (Physics.Raycast(ray, out RaycastHit hitInfo, 100f, groundLayer))
-            {
                 return hitInfo.point;
-            }
-            return new Vector3(0, -999, 0);
+            return null;
         }
+
         private void UpdatePreview()
         {
             if (_previewObject == null) return;
 
-            Vector3 mousePos = GetMouseWorldPosition();
-            if (mousePos.y < -900)
+            Vector3? mousePos = GetMouseWorldPosition();
+            if (mousePos == null)
             {
-                _previewObject.transform.position = new Vector3(0, -1000f, 0);
+                _previewObject.gameObject.SetActive(false);
                 return;
             }
-            Vector3 snappedPos = worldGridManager.SnapToGrid(mousePos, _previewObject.Size);
 
-            Vector3 finalPreviewPosition = GetPreviewPosition(snappedPos);
-            _previewObject.transform.position = finalPreviewPosition;
+            Vector3 snappedPos = worldGridManager.SnapToGrid(mousePos.Value, _previewObject.Size);
+            Vector3? finalPreviewPosition = GetPreviewPosition(snappedPos);
 
-            bool canPlace = IsPlacementValid(finalPreviewPosition, _previewObject.Size);
+            if (finalPreviewPosition == null)
+            {
+                _previewObject.gameObject.SetActive(false);
+                return;
+            }
+
+            _previewObject.gameObject.SetActive(true);
+            _previewObject.transform.position = finalPreviewPosition.Value;
+            bool canPlace = IsPlacementValid(finalPreviewPosition.Value, _previewObject.Size);
             _previewObject.GetComponent<VisualsController>()?.SetIsTransparent(true, canPlace ? 0.5f : 0.2f);
         }
-        private Vector3 GetPreviewPosition(Vector3 snappedPos)
+        private Vector3? GetPreviewPosition(Vector3 snappedPos)
         {
             if (_currentItemData == null) return snappedPos;
 
             var rules = _currentItemData.placementRules;
             List<Vector2Int> gridPositions = worldGridManager.GetGridPositionsForObject(snappedPos, _previewObject.Size);
 
-            // Determine if this is an upper layer placement.
             bool placeOnUpper = (rules.Layer == PlacementLayer.Upper);
             if (rules.Layer == PlacementLayer.Any)
             {
-                // For 'Any', it can only be 'Upper' if ALL tiles have ground objects.
                 bool canBeUpper = true;
                 foreach (var pos in gridPositions)
                 {
@@ -242,33 +231,22 @@ namespace ProjectWitchcraft.Managers
 
             if (placeOnUpper)
             {
-                // Now that we know it's an Upper object, find the highest point to place it on.
                 float highestPoint = float.MinValue;
                 foreach (var pos in gridPositions)
                 {
                     GridCell cell = worldGridManager.GetGridData(pos);
-                    // If any cell is missing a ground object, the placement is invalid. Sink the preview.
                     if (cell?.groundObject == null)
-                    {
-                        snappedPos.y = -1000f;
-                        return snappedPos;
-                    }
+                        return null;
 
-                    // Also check if the upper slot is already blocked by an object that can't be stacked on.
                     if (cell.upperObject != null && !cell.groundObject.ItemData.placementRules.AllowsStackingOnTop)
-                    {
-                        snappedPos.y = -1000f; // Sink the preview
-                        return snappedPos;
-                    }
+                        return null;
 
                     var groundCollider = cell.groundObject.GetComponent<Collider>();
                     if (groundCollider != null)
                     {
                         float topOfGroundObject = groundCollider.bounds.center.y + groundCollider.bounds.extents.y;
                         if (topOfGroundObject > highestPoint)
-                        {
                             highestPoint = topOfGroundObject;
-                        }
                     }
                 }
 
@@ -276,12 +254,10 @@ namespace ProjectWitchcraft.Managers
                 float halfHeight = objectCollider != null ? objectCollider.bounds.extents.y : 0.5f;
                 snappedPos.y = highestPoint + halfHeight;
             }
-            else // It's a Ground layer placement
+            else
             {
                 Collider objectCollider = _previewObject.GetComponent<Collider>();
                 float halfHeight = objectCollider != null ? objectCollider.bounds.extents.y : 0.5f;
-                // This is the original line from your script. I have reverted it back,
-                // as you mentioned it was intentional for your 3D objects.
                 snappedPos.y = 0.01f - halfHeight;
             }
             return snappedPos;
@@ -289,11 +265,8 @@ namespace ProjectWitchcraft.Managers
         private bool IsPlacementValid(Vector3 position, Vector3Int size)
         {
             if (_currentItemData == null || !inventoryManager.HasItem(_currentItemData, 1))
-            {
                 return false;
-            }
 
-            if (position.y < -900f) return false;
             List<Vector2Int> gridPositions = worldGridManager.GetGridPositionsForObject(position, size);
             foreach (var gridPos in gridPositions)
             {
@@ -315,6 +288,25 @@ namespace ProjectWitchcraft.Managers
                         bool upperIsBlocked = cell?.upperObject != null && !cell.upperObject.ItemData.placementRules.AllowsStackingOnTop;
                         if (groundOccupied && upperIsBlocked) return false;
                         break;
+                }
+            }
+
+            // Reject placement if the object's footprint would overlap the player's CharacterController.
+            // Uses the same AABB approximation as ActivateColliderSafely so both systems agree.
+            var playerTransform = GameReferences.Instance.PlayerTransform;
+            if (playerTransform != null)
+            {
+                var playerCC = playerTransform.GetComponent<CharacterController>();
+                if (playerCC != null)
+                {
+                    Vector3 ccCenter = playerCC.transform.TransformPoint(playerCC.center);
+                    Bounds ccBounds = new Bounds(ccCenter,
+                        new Vector3(playerCC.radius * 2f, playerCC.height, playerCC.radius * 2f));
+                    // Clamp each axis to at least 1 so flat objects (floor tiles with size.y == 0) still get tested.
+                    Bounds objectBounds = new Bounds(position,
+                        Vector3.Max(new Vector3(size.x, size.y, size.z), Vector3.one));
+                    if (ccBounds.Intersects(objectBounds))
+                        return false;
                 }
             }
 
