@@ -1,0 +1,16 @@
+{
+    "name": "ProjectWitchcraft.Stats",
+    "rootNamespace": "ProjectWitchcraft.Stats",
+    "references": [
+        "GUID:300a110dd3eac5b4bb4e1f772e744e41"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

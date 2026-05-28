@@ -1,0 +1,17 @@
+{
+    "name": "ProjectWitchcraft.World",
+    "rootNamespace": "",
+    "references": [
+        "GUID:300a110dd3eac5b4bb4e1f772e744e41",
+        "GUID:bf5c9cc9593e7354582f1a1b4dda283e"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

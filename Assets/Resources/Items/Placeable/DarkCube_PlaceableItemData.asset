@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b90c804dddd9804fa83145817ff649e, type: 3}
+  m_Name: DarkCube_PlaceableItemData
+  m_EditorClassIdentifier: 
+  Name: Dark Cube
+  Icon: {fileID: 21300000, guid: 1be314f42f250f444ba008c36f4c49e0, type: 3}
+  maxStackSize: 9999
+  description: 
+  placedPrefab: {fileID: 4623854818814885867, guid: 3ccb057c6c90ab2408cd039e7f52d59f, type: 3}
+  size: {x: 1, y: 1}
+  placementRules:
+    Layer: 2
+    AllowsStackingOnTop: 0

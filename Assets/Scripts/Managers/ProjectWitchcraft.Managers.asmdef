@@ -1,0 +1,19 @@
+{
+    "name": "ProjectWitchcraft.Managers",
+    "rootNamespace": "",
+    "references": [
+        "GUID:300a110dd3eac5b4bb4e1f772e744e41",
+        "GUID:18d9369666161d44c9258bd1ed5d46eb",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:79b21f3dbe465c74bb20ccefb40262b6"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

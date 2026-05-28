@@ -1,0 +1,19 @@
+{
+    "name": "ProjectWitchcraft.Player",
+    "rootNamespace": "",
+    "references": [
+        "GUID:300a110dd3eac5b4bb4e1f772e744e41",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:bf5c9cc9593e7354582f1a1b4dda283e",
+        "GUID:79b21f3dbe465c74bb20ccefb40262b6"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
