@@ -34,6 +34,8 @@ namespace ProjectWitchcraft.Player
             _characterStats = GetComponent<CharacterStats>();
             if (_characterStats == null)
                 Debug.LogError("PlayerMovement requires a CharacterStats component, but none was found.", this);
+
+            GameReferences.Instance.RegisterPlayer(transform);
         }
 
         private void Start()

@@ -10,7 +10,6 @@ namespace ProjectWitchcraft.Entities
         protected override void Awake()
         {
             base.Awake();
-            GameReferences.Instance.RegisterPlayer(transform);
         }
     }
 }

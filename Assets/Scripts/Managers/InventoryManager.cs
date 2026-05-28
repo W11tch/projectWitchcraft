@@ -85,11 +85,23 @@ namespace ProjectWitchcraft.Managers
             }
             else
             {
-                // Fallback: cursor pointing at sky — drop in front of the player.
-                Vector3 forwardDirection = playerTransform.forward;
-                forwardDirection.y = 0;
-                dropPosition = playerPosition + forwardDirection.normalized * _dropDistance;
+                // Ground layer missed — project cursor onto a flat plane at player height.
+                Plane groundPlane = new Plane(Vector3.up, playerPosition);
+                if (groundPlane.Raycast(ray, out float enter))
+                {
+                    Vector3 hitPoint = ray.GetPoint(enter);
+                    Vector3 toHit = hitPoint - playerPosition;
+                    toHit.y = 0;
+                    dropPosition = toHit.magnitude > _dropDistance
+                        ? playerPosition + toHit.normalized * _dropDistance
+                        : new Vector3(hitPoint.x, playerPosition.y, hitPoint.z);
+                }
+                else
+                {
+                    dropPosition = playerPosition + playerTransform.forward.normalized * _dropDistance;
+                }
             }
+
 
             EventManager.TriggerEvent(new ItemDroppedInWorldEvent
             {
