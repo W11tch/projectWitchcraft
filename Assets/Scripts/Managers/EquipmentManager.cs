@@ -185,15 +185,17 @@ namespace ProjectWitchcraft.Managers
                 _equippedItems[slot] = instance;
                 if (IsSlotActive(slot))
                     ApplyModifiers(instance);
+                EventManager.TriggerEvent(new EquipmentChangedEvent { Slot = slot, NewItem = instance });
             }
         }
 
         private void UnequipAll()
         {
-            foreach (var instance in _equippedItems.Values)
+            foreach (var (slot, instance) in _equippedItems)
             {
                 if (instance != null)
                     RemoveModifiers(instance);
+                EventManager.TriggerEvent(new EquipmentChangedEvent { Slot = slot, NewItem = null });
             }
             _equippedItems.Clear();
         }
