@@ -1,4 +1,3 @@
-// Located at: Assets/Scripts/Managers/InventoryManager.cs
 using System.Collections.Generic;
 using UnityEngine;
 using ProjectWitchcraft.Core;
@@ -18,14 +17,11 @@ namespace ProjectWitchcraft.Managers
 
         [Header("Drop Settings")]
         [SerializeField] private LayerMask _groundLayer;
-        // Controls how far from the player the item is dropped
         [SerializeField] private float _dropDistance = 1.5f;
 
         private List<InventorySlot> _hotbarSlots;
         private List<InventorySlot> _inventorySlots;
-        // A reference to the inventory of an external container (like a chest) that is currently open.
         private List<InventorySlot> _externalInventory;
-        // A property to check if an external inventory is currently open.
         public bool IsExternalInventoryOpen => _externalInventory != null;
 
         private InventorySlot _heldSlot = new InventorySlot();
@@ -35,25 +31,18 @@ namespace ProjectWitchcraft.Managers
         public IReadOnlyList<InventorySlot> ExternalInventory => _externalInventory;
         public InventorySlot HeldSlot => _heldSlot;
 
-        // Called by a UI controller (like ChestUIController) when a container is opened.
-        // <param name="externalInventory">The inventory list of the container being opened.</param>
         public void OpenExternalInventory(List<InventorySlot> externalInventory)
         {
             _externalInventory = externalInventory;
         }
 
-        // Called by a UI controller when a container UI is closed.
         public void CloseExternalInventory()
         {
-            // If the player is still holding an item when the container is closed,
-            // try to return it to their inventory. If there's no space, drop it.
             if (!_heldSlot.IsEmpty)
             {
-                AddItem(_heldSlot.item, _heldSlot.quantity);
-                if (!_heldSlot.IsEmpty) // If item could not be fully added
-                {
+                AddItem(_heldSlot.Instance?.Definition, _heldSlot.quantity);
+                if (!_heldSlot.IsEmpty)
                     DropHeldItem();
-                }
             }
             _externalInventory = null;
         }
@@ -71,12 +60,10 @@ namespace ProjectWitchcraft.Managers
 
             Vector3 dropPosition;
             Vector3 playerPosition = playerTransform.position;
-
             Ray ray = GameReferences.Instance.MainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
 
             if (Physics.Raycast(ray, out RaycastHit hit, 100f, _groundLayer))
             {
-                // Drop at cursor position, clamped to _dropDistance from the player.
                 Vector3 toHit = hit.point - playerPosition;
                 toHit.y = 0;
                 dropPosition = toHit.magnitude > _dropDistance
@@ -85,7 +72,6 @@ namespace ProjectWitchcraft.Managers
             }
             else
             {
-                // Ground layer missed — project cursor onto a flat plane at player height.
                 Plane groundPlane = new Plane(Vector3.up, playerPosition);
                 if (groundPlane.Raycast(ray, out float enter))
                 {
@@ -102,10 +88,9 @@ namespace ProjectWitchcraft.Managers
                 }
             }
 
-
             EventManager.TriggerEvent(new ItemDroppedInWorldEvent
             {
-                itemData = _heldSlot.item,
+                itemInstance = _heldSlot.Instance,
                 quantity = _heldSlot.quantity,
                 position = dropPosition
             });
@@ -124,25 +109,30 @@ namespace ProjectWitchcraft.Managers
             for (int i = 0; i < hotbarSize; i++) _hotbarSlots.Add(new InventorySlot());
             for (int i = 0; i < inventorySize; i++) _inventorySlots.Add(new InventorySlot());
         }
+
         private void OnEnable()
         {
             EventManager.AddListener<GatherSaveDataEvent>(OnGatherSaveData);
             EventManager.AddListener<ApplySaveDataEvent>(OnApplySaveData);
         }
+
         private void OnDisable()
         {
             EventManager.RemoveListener<GatherSaveDataEvent>(OnGatherSaveData);
             EventManager.RemoveListener<ApplySaveDataEvent>(OnApplySaveData);
         }
+
         public int AddItem(ItemData itemData, int amount)
         {
             if (itemData == null || amount <= 0) return amount;
             int amountRemaining = amount;
-            foreach (var slot in _hotbarSlots.Concat(_inventorySlots).Where(s => !s.IsEmpty && s.item == itemData))
+
+            foreach (var slot in _hotbarSlots.Concat(_inventorySlots).Where(s => !s.IsEmpty && s.Instance.Definition == itemData))
             {
                 amountRemaining = AddToStack(slot, amountRemaining);
                 if (amountRemaining == 0) break;
             }
+
             if (amountRemaining > 0)
             {
                 foreach (var slot in _hotbarSlots.Concat(_inventorySlots).Where(s => s.IsEmpty))
@@ -151,31 +141,58 @@ namespace ProjectWitchcraft.Managers
                     if (amountRemaining == 0) break;
                 }
             }
+
             if (amountRemaining < amount)
-            {
                 EventManager.TriggerEvent(new InventoryChangedEvent());
-            }
+
             return amountRemaining;
         }
+
+        // Puts an item directly into the held slot (e.g. when swapping out an equipped item).
+        public void SetHeldItem(ItemInstance instance, int quantity = 1)
+        {
+            _heldSlot = new InventorySlot(instance, quantity);
+            EventManager.TriggerEvent(new InventoryChangedEvent());
+        }
+
+        // Use this for durable items (equipment, weapons, tools) to preserve the existing instance.
+        public int AddItemInstance(ItemInstance instance, int amount)
+        {
+            if (instance == null || instance.IsEmpty || amount <= 0) return amount;
+            int remaining = amount;
+            foreach (var slot in _hotbarSlots.Concat(_inventorySlots).Where(s => s.IsEmpty))
+            {
+                slot.Instance = instance;
+                slot.quantity = 1;
+                remaining--;
+                if (remaining == 0) break;
+            }
+            if (remaining < amount)
+                EventManager.TriggerEvent(new InventoryChangedEvent());
+            return remaining;
+        }
+
         private int AddToStack(InventorySlot slot, int amount)
         {
-            int spaceAvailable = slot.item.maxStackSize - slot.quantity;
+            int spaceAvailable = slot.Instance.Definition.maxStackSize - slot.quantity;
             int amountToAdd = Mathf.Min(amount, spaceAvailable);
             slot.AddQuantity(amountToAdd);
             return amount - amountToAdd;
         }
+
         private int CreateNewStack(InventorySlot slot, ItemData item, int amount)
         {
             int amountToAdd = Mathf.Min(amount, item.maxStackSize);
-            slot.item = item;
+            slot.Instance = new ItemInstance(item);
             slot.quantity = amountToAdd;
             return amount - amountToAdd;
         }
+
         public void RemoveItem(ItemData itemData, int amount)
         {
             if (!HasItem(itemData, amount)) return;
             int amountToRemove = amount;
-            foreach (var slot in _hotbarSlots.Concat(_inventorySlots).Where(s => !s.IsEmpty && s.item == itemData))
+            foreach (var slot in _hotbarSlots.Concat(_inventorySlots).Where(s => !s.IsEmpty && s.Instance.Definition == itemData))
             {
                 int amountToRemoveFromSlot = Mathf.Min(amountToRemove, slot.quantity);
                 slot.quantity -= amountToRemoveFromSlot;
@@ -185,18 +202,17 @@ namespace ProjectWitchcraft.Managers
             }
             EventManager.TriggerEvent(new InventoryChangedEvent());
         }
-        public bool HasItem(ItemData itemData, int amount)
-        {
-            return GetItemAmount(itemData) >= amount;
-        }
+
+        public bool HasItem(ItemData itemData, int amount) => GetItemAmount(itemData) >= amount;
+
         public int GetItemAmount(ItemData itemData)
         {
             if (itemData == null) return 0;
             return _hotbarSlots.Concat(_inventorySlots)
-                .Where(s => !s.IsEmpty && s.item == itemData)
+                .Where(s => !s.IsEmpty && s.Instance.Definition == itemData)
                 .Sum(s => s.quantity);
         }
-        // This logic needs to handle different slot types
+
         public void PickupSlotContents(int fromIndex, InventoryType fromType)
         {
             if (!_heldSlot.IsEmpty) return;
@@ -206,10 +222,11 @@ namespace ProjectWitchcraft.Managers
             InventorySlot fromSlot = fromList[fromIndex];
             if (fromSlot.IsEmpty) return;
 
-            _heldSlot = new InventorySlot(fromSlot.item, fromSlot.quantity);
+            _heldSlot = new InventorySlot(fromSlot.Instance, fromSlot.quantity);
             fromSlot.Clear();
             EventManager.TriggerEvent(new InventoryChangedEvent());
         }
+
         public void DropHeldItemOnSlot(int toIndex, InventoryType toType)
         {
             if (_heldSlot.IsEmpty) return;
@@ -220,12 +237,12 @@ namespace ProjectWitchcraft.Managers
 
             if (toSlot.IsEmpty)
             {
-                toList[toIndex] = new InventorySlot(_heldSlot.item, _heldSlot.quantity);
+                toList[toIndex] = new InventorySlot(_heldSlot.Instance, _heldSlot.quantity);
                 _heldSlot.Clear();
             }
-            else if (toSlot.item == _heldSlot.item)
+            else if (toSlot.Instance.Definition == _heldSlot.Instance.Definition)
             {
-                int spaceInToStack = toSlot.item.maxStackSize - toSlot.quantity;
+                int spaceInToStack = toSlot.Instance.Definition.maxStackSize - toSlot.quantity;
                 int amountToMove = Mathf.Min(_heldSlot.quantity, spaceInToStack);
                 toSlot.AddQuantity(amountToMove);
                 _heldSlot.quantity -= amountToMove;
@@ -233,12 +250,13 @@ namespace ProjectWitchcraft.Managers
             }
             else
             {
-                InventorySlot temp = new InventorySlot(toSlot.item, toSlot.quantity);
-                toList[toIndex] = new InventorySlot(_heldSlot.item, _heldSlot.quantity);
+                InventorySlot temp = new InventorySlot(toSlot.Instance, toSlot.quantity);
+                toList[toIndex] = new InventorySlot(_heldSlot.Instance, _heldSlot.quantity);
                 _heldSlot = temp;
             }
             EventManager.TriggerEvent(new InventoryChangedEvent());
         }
+
         public void SplitStack(int fromIndex, InventoryType fromType)
         {
             if (!_heldSlot.IsEmpty) return;
@@ -248,13 +266,12 @@ namespace ProjectWitchcraft.Managers
             if (fromSlot.IsEmpty || fromSlot.quantity < 2) return;
             int halfAmount = Mathf.CeilToInt(fromSlot.quantity / 2f);
             fromSlot.quantity -= halfAmount;
-            _heldSlot = new InventorySlot(fromSlot.item, halfAmount);
+            _heldSlot = new InventorySlot(fromSlot.Instance.Definition, halfAmount);
             EventManager.TriggerEvent(new InventoryChangedEvent());
         }
-        public void PlaceHeldItem(int toIndex, InventoryType toType)
-        {
-            DropHeldItemOnSlot(toIndex, toType);
-        }
+
+        public void PlaceHeldItem(int toIndex, InventoryType toType) => DropHeldItemOnSlot(toIndex, toType);
+
         public void PlaceOneFromHeldStack(int toIndex, InventoryType toType)
         {
             if (_heldSlot.IsEmpty) return;
@@ -265,10 +282,10 @@ namespace ProjectWitchcraft.Managers
 
             if (toSlot.IsEmpty)
             {
-                toList[toIndex] = new InventorySlot(_heldSlot.item, 1);
+                toList[toIndex] = new InventorySlot(_heldSlot.Instance.Definition, 1);
                 _heldSlot.quantity--;
             }
-            else if (toSlot.item == _heldSlot.item && toSlot.quantity < toSlot.item.maxStackSize)
+            else if (toSlot.Instance.Definition == _heldSlot.Instance.Definition && toSlot.quantity < toSlot.Instance.Definition.maxStackSize)
             {
                 toSlot.AddQuantity(1);
                 _heldSlot.quantity--;
@@ -277,18 +294,14 @@ namespace ProjectWitchcraft.Managers
             EventManager.TriggerEvent(new InventoryChangedEvent());
         }
 
-                private List<InventorySlot> GetListFromType(InventoryType type)
+        private List<InventorySlot> GetListFromType(InventoryType type)
         {
             switch (type)
             {
-                case InventoryType.PlayerHotbar:
-                    return _hotbarSlots;
-                case InventoryType.PlayerInventory:
-                    return _inventorySlots;
-                case InventoryType.Container:
-                    return _externalInventory;
-                default:
-                    return null;
+                case InventoryType.PlayerHotbar: return _hotbarSlots;
+                case InventoryType.PlayerInventory: return _inventorySlots;
+                case InventoryType.Container: return _externalInventory;
+                default: return null;
             }
         }
 
@@ -305,8 +318,9 @@ namespace ProjectWitchcraft.Managers
 
         private static SlotData MakeSlotData(InventorySlot slot) => new SlotData
         {
-            itemGuid = slot.IsEmpty ? "" : slot.item.AssetGuid,
-            quantity = slot.quantity
+            itemGuid = slot.IsEmpty ? "" : slot.Instance.Definition.AssetGuid,
+            quantity = slot.quantity,
+            durability = slot.IsEmpty ? -1f : slot.Instance.CurrentDurability
         };
 
         private void OnApplySaveData(ApplySaveDataEvent e)
@@ -329,9 +343,10 @@ namespace ProjectWitchcraft.Managers
                 if (i >= dataList.Count) { slots[i].Clear(); continue; }
                 var data = dataList[i];
                 if (string.IsNullOrEmpty(data.itemGuid) || data.quantity <= 0) { slots[i].Clear(); continue; }
-                slots[i].item = _assetRegistry.GetItemByGuid(data.itemGuid);
+                var itemDef = _assetRegistry.GetItemByGuid(data.itemGuid);
+                if (itemDef == null) { slots[i].Clear(); continue; }
+                slots[i].Instance = new ItemInstance(itemDef) { CurrentDurability = data.durability };
                 slots[i].quantity = data.quantity;
-                if (slots[i].item == null) slots[i].Clear();
             }
         }
     }

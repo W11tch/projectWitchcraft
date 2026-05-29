@@ -7,7 +7,7 @@ namespace ProjectWitchcraft.Core
     [System.Serializable]
     public class SaveData
     {
-        public int version = 2;
+        public int version = 3;
         public PlayerSaveData player = new PlayerSaveData();
         public List<ObjectData> placedObjects = new List<ObjectData>();
         public List<WorldItemSaveData> worldItems = new List<WorldItemSaveData>();
@@ -18,6 +18,7 @@ namespace ProjectWitchcraft.Core
     {
         public List<SlotData> hotbar = new List<SlotData>();
         public List<SlotData> inventory = new List<SlotData>();
+        public EquipmentSaveData equipment = new EquipmentSaveData();
         public float px, py, pz;
 
         [JsonIgnore]
@@ -34,6 +35,23 @@ namespace ProjectWitchcraft.Core
     {
         public string itemGuid;
         public int quantity;
+        public float durability = -1f; // -1 means no durability; backwards compatible (missing field defaults to -1)
+    }
+
+    // One equipment or world-item instance — no quantity (always 1).
+    [System.Serializable]
+    public class ItemInstanceSaveData
+    {
+        public string itemGuid;
+        public float durability = -1f;
+    }
+
+    [System.Serializable]
+    public class EquipmentSaveData
+    {
+        // Key = EquipmentSlot enum name (e.g. "Head", "OffHand")
+        public System.Collections.Generic.Dictionary<string, ItemInstanceSaveData> slots = new();
+        public bool isOffHandActive = true;
     }
 
     [System.Serializable]
@@ -74,6 +92,7 @@ namespace ProjectWitchcraft.Core
     {
         public string itemGuid;
         public int quantity;
+        public float durability = -1f;
         public float px, py, pz;
 
         [JsonIgnore]

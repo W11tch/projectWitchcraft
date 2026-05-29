@@ -9,9 +9,15 @@ namespace ProjectWitchcraft.Core
         public int NewAmount;
     }
 
+    public struct EquipmentChangedEvent
+    {
+        public EquipmentSlot Slot;
+        public ItemInstance NewItem; // null when slot was cleared
+    }
+
     public struct ItemDroppedInWorldEvent
     {
-        public ItemData itemData;
+        public ItemInstance itemInstance;
         public int quantity;
         public Vector3 position;
     }

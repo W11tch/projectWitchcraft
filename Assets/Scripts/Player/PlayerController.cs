@@ -50,13 +50,18 @@ namespace ProjectWitchcraft.Player
                 if (slotIndex < 0 || slotIndex >= inventoryManager.HotbarSlots.Count) return;
 
                 var slot = inventoryManager.HotbarSlots[slotIndex];
+
+                // Determine 2H state regardless of whether the slot is empty.
+                bool isTwoHanded = slot.Instance?.Definition is WeaponItemData weapon && weapon.IsTwoHanded;
+                EquipmentManager.Instance.SetOffHandActive(!isTwoHanded);
+
                 if (slot.IsEmpty)
                 {
                     EventManager.TriggerEvent(new CancelActionTriggeredEvent());
                     return;
                 }
 
-                if (slot.item is PlaceableItemData placeableItem)
+                if (slot.Instance?.Definition is PlaceableItemData placeableItem)
                 {
                     EventManager.TriggerEvent(new PlacementModeRequestedEvent { ItemData = placeableItem });
                 }

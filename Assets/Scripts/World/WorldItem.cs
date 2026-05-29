@@ -42,8 +42,10 @@ namespace ProjectWitchcraft.World
         [Header("Attraction")]
         [SerializeField] private float _attractionSpeed = 8f;
 
-        public ItemData ItemData { get; private set; }
+        public ItemInstance ItemInstance { get; private set; }
         public int Quantity { get; private set; }
+        // Convenience accessor used by systems that only need the definition.
+        public ItemData ItemData => ItemInstance?.Definition;
 
         private ItemState _currentState;
         private Transform _playerTransform;
@@ -65,33 +67,34 @@ namespace ProjectWitchcraft.World
         }
 
         // Called by WorldItemSpawner for normal player drops.
-        public void Initialize(ItemData itemData, int quantity, bool playerDrop = false)
+        public void Initialize(ItemInstance itemInstance, int quantity, bool playerDrop = false)
         {
-            SetupVisuals(itemData, quantity);
+            SetupVisuals(itemInstance, quantity);
             _currentState = ItemState.Animating;
             StopAllCoroutines();
             StartCoroutine(playerDrop ? AnimateDropFromAbove() : AnimatePopFromGround());
         }
 
         // Called by WorldItemSpawner when restoring items from a save file.
-        public void InitializeFromSave(ItemData itemData, int quantity)
+        public void InitializeFromSave(ItemInstance itemInstance, int quantity)
         {
-            SetupVisuals(itemData, quantity);
+            SetupVisuals(itemInstance, quantity);
             if (_iconSpriteRenderer != null) _iconSpriteRenderer.enabled = true;
             if (_shadowSpriteRenderer != null) _shadowSpriteRenderer.enabled = true;
             if (_iconTransform != null) _iconTransform.localPosition = new Vector3(0, _floatHeight, 0);
             _currentState = ItemState.Idle;
         }
 
-        private void SetupVisuals(ItemData itemData, int quantity)
+        private void SetupVisuals(ItemInstance itemInstance, int quantity)
         {
-            ItemData = itemData;
+            ItemInstance = itemInstance;
             Quantity = quantity;
+            var itemData = itemInstance?.Definition;
 
             if (_playerTransform == null)
                 _playerTransform = GameReferences.Instance.PlayerTransform;
 
-            if (_iconSpriteRenderer != null)
+            if (_iconSpriteRenderer != null && itemData != null)
             {
                 _iconSpriteRenderer.sprite = itemData.Icon;
 
@@ -209,17 +212,17 @@ namespace ProjectWitchcraft.World
 
         private void TryPickup()
         {
-            if (ItemData == null) return;
+            if (ItemInstance == null || ItemInstance.IsEmpty) return;
 
-            int remainingQuantity = InventoryManager.Instance.AddItem(ItemData, Quantity);
+            int remaining = ItemInstance.HasDurability
+                ? InventoryManager.Instance.AddItemInstance(ItemInstance, Quantity)
+                : InventoryManager.Instance.AddItem(ItemInstance.Definition, Quantity);
 
-            if (remainingQuantity == 0)
-            {
+            if (remaining == 0)
                 gameObject.SetActive(false);
-            }
             else
             {
-                Quantity = remainingQuantity;
+                Quantity = remaining;
                 _currentState = ItemState.Idle;
             }
         }

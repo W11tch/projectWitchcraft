@@ -31,7 +31,7 @@ namespace ProjectWitchcraft.UI
             }
             else
             {
-                _itemIcon.sprite = slot.item.Icon;
+                _itemIcon.sprite = slot.Instance.Definition.Icon;
                 _itemIcon.enabled = true;
                 _quantityText.text = slot.quantity > 1 ? slot.quantity.ToString() : "";
                 _quantityText.enabled = slot.quantity > 1;

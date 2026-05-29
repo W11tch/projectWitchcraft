@@ -12,6 +12,9 @@ namespace ProjectWitchcraft.Core
         [TextArea]
         public string description;
 
+        // -1 means no durability. Override in durable item types (EquipmentItemData, WeaponItemData, ToolItemData).
+        public virtual float GetMaxDurability() => -1f;
+
         // Populated automatically in the editor via OnValidate.
         // Used by the save system so renaming an asset never breaks saves.
         [SerializeField, HideInInspector] private string _assetGuid;

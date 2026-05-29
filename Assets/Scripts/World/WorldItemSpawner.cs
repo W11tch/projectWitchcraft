@@ -1,4 +1,3 @@
-// Located at: Assets/Scripts/World/WorldItemSpawner.cs
 using System.Collections.Generic;
 using UnityEngine;
 using ProjectWitchcraft.Core;
@@ -31,7 +30,7 @@ namespace ProjectWitchcraft.World
 
         private void OnItemDropped(ItemDroppedInWorldEvent e)
         {
-            SpawnWorldItem(e.itemData, e.quantity, e.position, playerDrop: true);
+            SpawnWorldItem(e.itemInstance, e.quantity, e.position, playerDrop: true);
         }
 
         private void OnGatherSaveData(GatherSaveDataEvent e)
@@ -43,18 +42,21 @@ namespace ProjectWitchcraft.World
             {
                 if (!child.gameObject.activeSelf) continue;
                 var worldItem = child.GetComponent<WorldItem>();
-                if (worldItem?.ItemData == null) continue;
+                if (worldItem?.ItemInstance == null || worldItem.ItemInstance.IsEmpty) continue;
 
-                var data = new WorldItemSaveData { quantity = worldItem.Quantity };
+                var data = new WorldItemSaveData
+                {
+                    itemGuid = worldItem.ItemInstance.Definition.AssetGuid,
+                    quantity = worldItem.Quantity,
+                    durability = worldItem.ItemInstance.CurrentDurability
+                };
                 data.Position = child.position;
-                data.itemGuid = worldItem.ItemData.AssetGuid;
                 e.SaveData.worldItems.Add(data);
             }
         }
 
         private void OnApplySaveData(ApplySaveDataEvent e)
         {
-            // Return all live world items to the pool before restoring from save.
             if (worldItemsParent != null)
             {
                 var toReturn = new List<GameObject>();
@@ -75,17 +77,18 @@ namespace ProjectWitchcraft.World
 
             foreach (var data in e.SaveData.worldItems)
             {
-                ItemData itemData = _assetRegistry.GetItemByGuid(data.itemGuid);
-                if (itemData == null)
+                var itemDef = _assetRegistry.GetItemByGuid(data.itemGuid);
+                if (itemDef == null)
                 {
                     Debug.LogWarning($"[WorldItemSpawner] Could not find item with GUID '{data.itemGuid}' — skipping.");
                     continue;
                 }
-                SpawnWorldItem(itemData, data.quantity, data.Position, playerDrop: false, fromSave: true);
+                var instance = new ItemInstance(itemDef) { CurrentDurability = data.durability };
+                SpawnWorldItem(instance, data.quantity, data.Position, playerDrop: false, fromSave: true);
             }
         }
 
-        private void SpawnWorldItem(ItemData itemData, int quantity, Vector3 position, bool playerDrop, bool fromSave = false)
+        private void SpawnWorldItem(ItemInstance itemInstance, int quantity, Vector3 position, bool playerDrop, bool fromSave = false)
         {
             if (objectPooler == null)
             {
@@ -103,9 +106,9 @@ namespace ProjectWitchcraft.World
             if (worldItem == null) return;
 
             if (fromSave)
-                worldItem.InitializeFromSave(itemData, quantity);
+                worldItem.InitializeFromSave(itemInstance, quantity);
             else
-                worldItem.Initialize(itemData, quantity, playerDrop);
+                worldItem.Initialize(itemInstance, quantity, playerDrop);
         }
     }
 }

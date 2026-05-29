@@ -27,10 +27,7 @@ namespace ProjectWitchcraft.Stats
         // The core of the system: a dictionary that holds all active modifiers for each stat.
         private readonly Dictionary<StatDefinition, List<StatModifier>> _statModifiers = new Dictionary<StatDefinition, List<StatModifier>>();
 
-        // A cache to store the final calculated values of stats. This improves performance
-        // by avoiding recalculation every time a stat is accessed within the same frame.
         private readonly Dictionary<StatDefinition, float> _cachedStatValues = new Dictionary<StatDefinition, float>();
-        private bool _isCacheDirty = true;
 
         /// <summary>
         /// A helper class to associate a StatDefinition with a list of its modifiers.
@@ -67,15 +64,14 @@ namespace ProjectWitchcraft.Stats
         /// <param name="source">The source of the modifiers to remove.</param>
         public void RemoveModifiersFromSource(object source)
         {
-            foreach (var statMods in _statModifiers.Values)
+            foreach (var (stat, statMods) in _statModifiers)
             {
-                // We iterate backwards because we are removing items from the list.
                 for (int i = statMods.Count - 1; i >= 0; i--)
                 {
                     if (statMods[i].Source == source)
                     {
                         statMods.RemoveAt(i);
-                        _isCacheDirty = true;
+                        _cachedStatValues.Remove(stat);
                     }
                 }
             }
@@ -88,30 +84,20 @@ namespace ProjectWitchcraft.Stats
         /// <returns>The final stat value.</returns>
         public float GetStatValue(StatDefinition stat)
         {
-            if (!_isCacheDirty && _cachedStatValues.TryGetValue(stat, out float cachedValue))
-            {
+            if (_cachedStatValues.TryGetValue(stat, out float cachedValue))
                 return cachedValue;
-            }
 
             float value = CalculateStatValue(stat);
             _cachedStatValues[stat] = value;
             return value;
         }
 
-        public void LateUpdate()
-        {
-            // Invalidate the cache at the end of each frame.
-            _isCacheDirty = true;
-        }
-
         private void AddModifier(StatDefinition stat, StatModifier mod)
         {
             if (!_statModifiers.ContainsKey(stat))
-            {
                 _statModifiers[stat] = new List<StatModifier>();
-            }
             _statModifiers[stat].Add(mod);
-            _isCacheDirty = true;
+            _cachedStatValues.Remove(stat);
         }
 
         private float CalculateStatValue(StatDefinition stat)

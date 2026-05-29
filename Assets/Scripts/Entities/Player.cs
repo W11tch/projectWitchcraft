@@ -1,5 +1,4 @@
 using ProjectWitchcraft.Core;
-using ProjectWitchcraft.Managers;
 
 namespace ProjectWitchcraft.Entities
 {

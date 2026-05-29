@@ -33,7 +33,7 @@ namespace ProjectWitchcraft.UI
                 // **FIX:** Enable the component directly
                 _icon.enabled = true;
                 _rectTransform.position = Input.mousePosition;
-                _icon.sprite = _inventoryManager.HeldSlot.item.Icon;
+                _icon.sprite = _inventoryManager.HeldSlot.Instance?.Definition?.Icon;
 
                 if (_inventoryManager.HeldSlot.quantity > 1)
                 {

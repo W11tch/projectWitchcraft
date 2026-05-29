@@ -22,7 +22,9 @@ namespace ProjectWitchcraft.Core
         // The menu was opened to interact with a container (e.g., a chest).
         Container,
         // The menu was opened for an interaction that requires seeing player stats (e.g., an enchanting table).
-        InfoInteraction
+        InfoInteraction,
+        // The character equipment panel is open.
+        Equipment
     }
 
     public struct GameStateChangedEvent

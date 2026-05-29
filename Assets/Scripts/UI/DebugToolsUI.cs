@@ -63,7 +63,28 @@ namespace ProjectWitchcraft.UI
             if (inventoryManager == null || itemDatabase == null) return;
             foreach (var itemData in itemDatabase.AllItems)
             {
-                if (itemData != null) { inventoryManager.AddItem(itemData, amountToAdd); }
+                if (itemData != null) { inventoryManager.AddItem(itemData, Mathf.Min(amountToAdd, itemData.maxStackSize)); }
+            }
+        }
+
+        public void RepairEverything()
+        {
+            // Repair all items in hotbar and inventory.
+            RepairSlotList(inventoryManager.HotbarSlots);
+            RepairSlotList(inventoryManager.InventorySlots);
+            if (inventoryManager.ExternalInventory != null)
+                RepairSlotList(inventoryManager.ExternalInventory);
+
+            // Repair all equipped items.
+            EquipmentManager.Instance.RepairAll();
+        }
+
+        private static void RepairSlotList(System.Collections.Generic.IReadOnlyList<InventorySlot> slots)
+        {
+            foreach (var slot in slots)
+            {
+                if (!slot.IsEmpty && slot.Instance.HasDurability && slot.Instance.Definition != null)
+                    slot.Instance.CurrentDurability = slot.Instance.Definition.GetMaxDurability();
             }
         }
     }

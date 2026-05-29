@@ -1,51 +1,34 @@
-// Located at: Assets/Scripts/Core/InventorySlot.cs
 using ProjectWitchcraft.Core;
 
-/// <summary>
-/// Represents a single slot within an inventory. It holds a reference
-/// to the item data and the quantity of that item in this slot.
-/// </summary>
 [System.Serializable]
 public class InventorySlot
 {
-    public ItemData item;   // The ScriptableObject defining the item in this slot.
-    public int quantity;    // The number of items in this slot.
+    public ItemInstance Instance;
+    public int quantity;
 
-    // A flag to easily check if the slot is empty.
-    public bool IsEmpty => item == null || quantity <= 0;
+    public bool IsEmpty => Instance == null || Instance.Definition == null || quantity <= 0;
 
-    /// <summary>
-    /// Creates an empty inventory slot.
-    /// </summary>
-    public InventorySlot()
-    {
-        item = null;
-        quantity = 0;
-    }
+    public InventorySlot() { }
 
-    /// <summary>
-    /// Creates an inventory slot with a specific item and quantity.
-    /// </summary>
+    // Convenience constructor — creates a fresh ItemInstance for the given definition.
     public InventorySlot(ItemData item, int quantity)
     {
-        this.item = item;
+        Instance = item != null ? new ItemInstance(item) : null;
         this.quantity = quantity;
     }
 
-    /// <summary>
-    /// Clears the slot, making it empty.
-    /// </summary>
+    // Use this when moving an existing instance between slots to preserve runtime state (durability, etc.).
+    public InventorySlot(ItemInstance instance, int quantity)
+    {
+        Instance = instance;
+        this.quantity = quantity;
+    }
+
     public void Clear()
     {
-        item = null;
+        Instance = null;
         quantity = 0;
     }
 
-    /// <summary>
-    /// Adds a given amount to the slot's quantity.
-    /// </summary>
-    public void AddQuantity(int amount)
-    {
-        quantity += amount;
-    }
+    public void AddQuantity(int amount) => quantity += amount;
 }

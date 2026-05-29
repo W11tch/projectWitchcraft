@@ -45,8 +45,9 @@ namespace ProjectWitchcraft.Interactables
             foreach (var slot in Inventory)
                 data.slots.Add(new SlotData
                 {
-                    itemGuid = slot.IsEmpty ? "" : slot.item.AssetGuid,
-                    quantity = slot.quantity
+                    itemGuid = slot.IsEmpty ? "" : slot.Instance.Definition.AssetGuid,
+                    quantity = slot.quantity,
+                    durability = slot.IsEmpty ? -1f : slot.Instance.CurrentDurability
                 });
             return data;
         }
@@ -63,9 +64,10 @@ namespace ProjectWitchcraft.Interactables
                     Inventory[i].Clear();
                     continue;
                 }
-                Inventory[i].item = registry.GetItemByGuid(slotData.itemGuid);
+                var itemDef = registry.GetItemByGuid(slotData.itemGuid);
+                if (itemDef == null) { Inventory[i].Clear(); continue; }
+                Inventory[i].Instance = new ItemInstance(itemDef) { CurrentDurability = slotData.durability };
                 Inventory[i].quantity = slotData.quantity;
-                if (Inventory[i].item == null) Inventory[i].Clear();
             }
         }
     }
