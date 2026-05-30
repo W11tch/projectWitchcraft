@@ -1,4 +1,3 @@
-// Located at: Assets/Scripts/UI/DebugToolsUI.cs
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
@@ -10,8 +9,7 @@ namespace ProjectWitchcraft.UI
     public class DebugToolsUI : MonoBehaviour
     {
         [Header("Dependencies")]
-        [SerializeField] private InventoryManager inventoryManager;
-        [SerializeField] private ItemDatabase itemDatabase; // Renamed
+        [SerializeField] private AssetRegistry _assetRegistry;
 
         [Header("UI & Settings")]
         [SerializeField] private GameObject debugPanel;
@@ -21,7 +19,7 @@ namespace ProjectWitchcraft.UI
 
         private void Start()
         {
-            if (debugPanel != null) { debugPanel.SetActive(false); }
+            if (debugPanel != null) debugPanel.SetActive(false);
 
             if (flyModeToggle != null)
             {
@@ -40,12 +38,12 @@ namespace ProjectWitchcraft.UI
 
         private void Update()
         {
-            if (Keyboard.current.backquoteKey.wasPressedThisFrame) { ToggleDebugPanel(); }
+            if (Keyboard.current.backquoteKey.wasPressedThisFrame) ToggleDebugPanel();
         }
 
         public void ToggleDebugPanel()
         {
-            if (debugPanel != null) { debugPanel.SetActive(!debugPanel.activeSelf); }
+            if (debugPanel != null) debugPanel.SetActive(!debugPanel.activeSelf);
         }
 
         public void OnFlyModeToggled(bool isFlyModeOn)
@@ -58,24 +56,33 @@ namespace ProjectWitchcraft.UI
             EventManager.TriggerEvent(new ToggleDestroyModeEvent { IsDestroyModeActive = isDestroyModeOn });
         }
 
-        public void GiveAllItems() // Renamed from GiveAllResources
+        public void GiveAllItems()
         {
-            if (inventoryManager == null || itemDatabase == null) return;
-            foreach (var itemData in itemDatabase.AllItems)
+            if (_assetRegistry == null) { Debug.LogError("[DebugTools] AssetRegistry not assigned."); return; }
+            var inv = InventoryManager.Instance;
+            if (inv == null) { Debug.LogError("[DebugTools] InventoryManager.Instance is null."); return; }
+
+            int count = 0;
+            foreach (var itemData in _assetRegistry.AllItemsOfAllTypes)
             {
-                if (itemData != null) { inventoryManager.AddItem(itemData, Mathf.Min(amountToAdd, itemData.maxStackSize)); }
+                if (itemData != null)
+                {
+                    inv.AddItem(itemData, Mathf.Min(amountToAdd, itemData.maxStackSize));
+                    count++;
+                }
             }
+            Debug.Log($"[DebugTools] GiveAllItems: attempted {count} items.");
         }
 
         public void RepairEverything()
         {
-            // Repair all items in hotbar and inventory.
-            RepairSlotList(inventoryManager.HotbarSlots);
-            RepairSlotList(inventoryManager.InventorySlots);
-            if (inventoryManager.ExternalInventory != null)
-                RepairSlotList(inventoryManager.ExternalInventory);
+            var inv = InventoryManager.Instance;
+            if (inv == null) return;
+            RepairSlotList(inv.HotbarSlots);
+            RepairSlotList(inv.InventorySlots);
+            if (inv.ExternalInventory != null)
+                RepairSlotList(inv.ExternalInventory);
 
-            // Repair all equipped items.
             EquipmentManager.Instance.RepairAll();
         }
 

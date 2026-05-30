@@ -1,6 +1,8 @@
 using UnityEngine;
 using ProjectWitchcraft.Core;
 using System.IO;
+using System.Threading.Tasks;
+using System.Collections;
 using Newtonsoft.Json;
 
 namespace ProjectWitchcraft.Managers
@@ -57,23 +59,48 @@ namespace ProjectWitchcraft.Managers
         public void LoadGame()
         {
             if (!File.Exists(_savePath)) return;
+            StartCoroutine(LoadGameCoroutine());
+        }
 
-            try
+        private IEnumerator LoadGameCoroutine()
+        {
+            GameManager.Instance.UpdateState(GameState.Loading);
+
+            // File read and JSON deserialization on a background thread.
+            string json = null;
+            SaveData saveData = null;
+            System.Exception loadError = null;
+
+            var task = Task.Run(() =>
             {
-                string json = File.ReadAllText(_savePath);
-                var saveData = JsonConvert.DeserializeObject<SaveData>(json, JsonSettings);
-                if (saveData == null)
-                {
-                    Debug.LogError("[SaveManager] Deserialized save data is null.");
-                    return;
-                }
-                EventManager.TriggerEvent(new ApplySaveDataEvent { SaveData = saveData });
-                EventManager.TriggerEvent(new GameLoadedEvent());
-            }
-            catch (System.Exception ex)
+                json = File.ReadAllText(_savePath);
+                saveData = JsonConvert.DeserializeObject<SaveData>(json, JsonSettings);
+            });
+
+            yield return new WaitUntil(() => task.IsCompleted);
+
+            if (task.IsFaulted)
             {
-                Debug.LogError($"[SaveManager] Load failed: {ex.Message}");
+                Debug.LogError($"[SaveManager] Load failed: {task.Exception?.InnerException?.Message}");
+                GameManager.Instance.UpdateState(GameState.Playing);
+                yield break;
             }
+
+            if (saveData == null)
+            {
+                Debug.LogError("[SaveManager] Deserialized save data is null.");
+                GameManager.Instance.UpdateState(GameState.Playing);
+                yield break;
+            }
+
+            // Fast listeners: inventory, player position, equipment, world items.
+            EventManager.TriggerEvent(new ApplySaveDataEvent { SaveData = saveData });
+
+            // Heavy listener: placed objects — spread across frames.
+            yield return ChunkManager.Instance.RestoreObjectsCoroutine(saveData.placedObjects);
+
+            GameManager.Instance.UpdateState(GameState.Playing);
+            EventManager.TriggerEvent(new GameLoadedEvent());
         }
     }
 }

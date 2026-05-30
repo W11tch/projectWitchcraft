@@ -1,2 +1,16 @@
 fileFormatVersion: 2
 guid: 93a077cdc9a3ff645be40e84e7e90bd8
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - inventoryManager: {instanceID: 0}
+  - _assetRegistry: {fileID: 11400000, guid: 0186f186ea8a83b4083cf445e8e0f0cc, type: 2}
+  - debugPanel: {instanceID: 0}
+  - flyModeToggle: {instanceID: 0}
+  - destroyModeToggle: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -9,7 +9,6 @@ namespace ProjectWitchcraft.Managers
     public class InventoryManager : Singleton<InventoryManager>
     {
         [Header("Data")]
-        [SerializeField] private ItemDatabase itemDatabase;
         [SerializeField] private AssetRegistry _assetRegistry;
         [Header("Settings")]
         [SerializeField] private int hotbarSize = 10;
@@ -102,8 +101,8 @@ namespace ProjectWitchcraft.Managers
         protected override void Awake()
         {
             base.Awake();
-            if (itemDatabase != null) itemDatabase.Initialize();
-            else Debug.LogError("ItemDatabase is not assigned in the InventoryManager Inspector!", this.gameObject);
+            if (_assetRegistry != null) _assetRegistry.Initialize();
+            else Debug.LogError("[InventoryManager] AssetRegistry is not assigned in the Inspector!", this.gameObject);
             _hotbarSlots = new List<InventorySlot>(hotbarSize);
             _inventorySlots = new List<InventorySlot>(inventorySize);
             for (int i = 0; i < hotbarSize; i++) _hotbarSlots.Add(new InventorySlot());

@@ -8,14 +8,15 @@ using UnityEngine.UI;
 
 namespace ProjectWitchcraft.UI
 {
-    public class UI_InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IPointerClickHandler
+    public class UI_InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
         [Header("UI Elements")]
         [SerializeField] private Image _itemIcon;
         [SerializeField] private TextMeshProUGUI _quantityText;
         private InventoryManager _inventoryManager;
         private int _slotIndex;
-        private InventoryType _slotType; // **MODIFIED**: This now uses the enum from the Core assembly.
+        private InventoryType _slotType;
+        private InventorySlot _currentSlot; // **MODIFIED**: This now uses the enum from the Core assembly.
         public void Initialize(InventoryManager manager, int index, InventoryType type)
         {
             _inventoryManager = manager;
@@ -24,6 +25,7 @@ namespace ProjectWitchcraft.UI
         }
         public void UpdateSlot(InventorySlot slot)
         {
+            _currentSlot = slot;
             if (slot.IsEmpty)
             {
                 _itemIcon.enabled = false;
@@ -85,6 +87,22 @@ namespace ProjectWitchcraft.UI
         public void OnDrop(PointerEventData eventData)
         {
             _inventoryManager.DropHeldItemOnSlot(_slotIndex, _slotType);
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (_currentSlot == null || _currentSlot.IsEmpty) return;
+
+            var held = _inventoryManager.HeldSlot;
+            if (!held.IsEmpty)
+                UI_ItemTooltip.Instance?.ShowWithComparison(_currentSlot.Instance, held.Instance);
+            else
+                UI_ItemTooltip.Instance?.Show(_currentSlot.Instance);
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            UI_ItemTooltip.Instance?.Hide();
         }
     }
 }

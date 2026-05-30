@@ -6,7 +6,10 @@ using ProjectWitchcraft.Managers;
 
 namespace ProjectWitchcraft.UI
 {
-    public class UI_EquipmentSlot : MonoBehaviour, IDropHandler, IPointerClickHandler
+    public class UI_EquipmentSlot : MonoBehaviour,
+        IBeginDragHandler, IDragHandler, IEndDragHandler,
+        IDropHandler, IPointerClickHandler,
+        IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] private Image _icon;
 
@@ -55,6 +58,27 @@ namespace ProjectWitchcraft.UI
                 _icon.color = active ? Color.white : new Color(0.4f, 0.4f, 0.4f, 1f);
         }
 
+        // Drag out to unequip — mirrors InventorySlot.OnBeginDrag.
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            if (!_inventoryManager.HeldSlot.IsEmpty) return;
+
+            var unequipped = EquipmentManager.Instance.Unequip(_slotType);
+            if (unequipped == null) return;
+
+            _inventoryManager.SetHeldItem(unequipped);
+        }
+
+        public void OnDrag(PointerEventData eventData) { }
+
+        // If drag ends over nothing, drop the held item into the world.
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            if (eventData.pointerCurrentRaycast.gameObject == null)
+                _inventoryManager.DropHeldItem();
+        }
+
+        // Drop a held item onto this slot to equip it.
         public void OnDrop(PointerEventData eventData)
         {
             var heldSlot = _inventoryManager.HeldSlot;
@@ -71,17 +95,31 @@ namespace ProjectWitchcraft.UI
                 EventManager.TriggerEvent(new InventoryChangedEvent());
         }
 
+        // Click to place a held item — mirrors inventory click-to-place.
         public void OnPointerClick(PointerEventData eventData)
         {
             if (eventData.dragging) return;
             if (eventData.button != PointerEventData.InputButton.Left) return;
+            if (_inventoryManager.HeldSlot.IsEmpty) return;
 
-            var unequipped = EquipmentManager.Instance.Unequip(_slotType);
-            if (unequipped == null) return;
+            OnDrop(eventData);
+        }
 
-            int remaining = _inventoryManager.AddItemInstance(unequipped, 1);
-            if (remaining > 0)
-                _inventoryManager.SetHeldItem(unequipped);
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            var item = EquipmentManager.Instance.GetEquippedItem(_slotType);
+            if (item == null || item.IsEmpty) return;
+
+            var held = _inventoryManager.HeldSlot;
+            if (!held.IsEmpty)
+                UI_ItemTooltip.Instance?.ShowWithComparison(item, held.Instance);
+            else
+                UI_ItemTooltip.Instance?.Show(item);
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            UI_ItemTooltip.Instance?.Hide();
         }
     }
 }

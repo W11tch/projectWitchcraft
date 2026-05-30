@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ProjectWitchcraft.BuildingSystem;
@@ -204,18 +205,25 @@ namespace ProjectWitchcraft.Managers
             saveData.placedObjects.Add(data);
         }
 
-        private void OnApplySaveData(ApplySaveDataEvent e)
+        // Called by SaveManager during load. Placed-object restoration is handled
+        // by RestoreObjectsCoroutine to avoid a single-frame hitch.
+        private void OnApplySaveData(ApplySaveDataEvent e) { }
+
+        private const int ObjectsPerFrame = 20;
+
+        public System.Collections.IEnumerator RestoreObjectsCoroutine(System.Collections.Generic.List<ObjectData> placedObjects)
         {
             if (_assetRegistry == null)
             {
                 Debug.LogError("[ChunkManager] AssetRegistry not assigned. Cannot load placed objects.");
-                return;
+                yield break;
             }
 
             ClearAll();
             var parent = PlacementManager.Instance?.PlacedObjectsParent;
+            int spawned = 0;
 
-            foreach (var data in e.SaveData.placedObjects)
+            foreach (var data in placedObjects)
             {
                 var itemData = _assetRegistry.GetPlaceableByGuid(data.itemGuid);
                 if (itemData == null)
@@ -237,9 +245,12 @@ namespace ProjectWitchcraft.Managers
                 obj.Placed = true;
                 PlaceObject(obj);
 
-                // Chest data is embedded alongside the object — no ID lookup needed.
                 if (data.chest != null)
                     go.GetComponent<IChestInventory>()?.ApplySaveData(data.chest, _assetRegistry);
+
+                spawned++;
+                if (spawned % ObjectsPerFrame == 0)
+                    yield return null;
             }
         }
     }

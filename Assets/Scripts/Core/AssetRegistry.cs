@@ -88,5 +88,18 @@ namespace ProjectWitchcraft.Core
         public IReadOnlyList<EquipmentItemData> AllEquipment => _equipment;
         public IReadOnlyList<WeaponItemData> AllWeapons => _weapons;
         public IReadOnlyList<ToolItemData> AllTools => _tools;
+
+        // All registered items across every type — use this instead of ItemDatabase.
+        public IEnumerable<ItemData> AllItemsOfAllTypes
+        {
+            get
+            {
+                foreach (var i in _items) yield return i;
+                foreach (var i in _placeables) yield return i;
+                foreach (var i in _equipment) yield return i;
+                foreach (var i in _weapons) yield return i;
+                foreach (var i in _tools) yield return i;
+            }
+        }
     }
 }

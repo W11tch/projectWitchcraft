@@ -10,7 +10,14 @@ namespace ProjectWitchcraft.Managers
 
         private static readonly HashSet<(GameState, GameState)> ValidTransitions = new()
         {
+            // Loading is reachable from any state (triggered by SaveManager).
             (GameState.Loading,    GameState.Playing),
+            (GameState.Playing,    GameState.Loading),
+            (GameState.Building,   GameState.Loading),
+            (GameState.InMenu,     GameState.Loading),
+            (GameState.Combat,     GameState.Loading),
+            (GameState.Paused,     GameState.Loading),
+            (GameState.Cinematic,  GameState.Loading),
 
             (GameState.Playing,    GameState.Building),
             (GameState.Playing,    GameState.InMenu),
