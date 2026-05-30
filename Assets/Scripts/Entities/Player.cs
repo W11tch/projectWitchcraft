@@ -1,5 +1,3 @@
-using ProjectWitchcraft.Core;
-
 namespace ProjectWitchcraft.Entities
 {
     // Player entity component — sits alongside PlayerMovement and PlayerController
