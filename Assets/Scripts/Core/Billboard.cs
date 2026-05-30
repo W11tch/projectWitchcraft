@@ -9,7 +9,19 @@ namespace ProjectWitchcraft.Core
     /// </summary>
     public class Billboard : MonoBehaviour
     {
+        [SerializeField] private float groundingOffset;
+        [SerializeField] private float forwardOffset;
+        // Enable only on sprite children of placed objects, never on root GameObjects.
+        // Keeps the depth/grounding offset in world space so it doesn't rotate with the parent.
+        [SerializeField] private bool _worldSpacePositioning;
+
         private Transform _cameraTransform;
+        private float _baseZ;
+
+        private void Awake()
+        {
+            _baseZ = transform.localPosition.z;
+        }
 
         private void Start()
         {
@@ -21,6 +33,10 @@ namespace ProjectWitchcraft.Core
         {
             if (_cameraTransform == null) return;
             transform.rotation = _cameraTransform.rotation;
+
+            if (_worldSpacePositioning && transform.parent != null)
+                transform.position = transform.parent.position
+                    + new Vector3(0f, -groundingOffset, -(_baseZ + forwardOffset));
         }
     }
 }

@@ -22,6 +22,8 @@ namespace ProjectWitchcraft.UI
             EquipmentSlot.Ring2,
         };
 
+        private bool _slotsCreated;
+
         private void Awake()
         {
             gameObject.SetActive(false);
@@ -33,14 +35,25 @@ namespace ProjectWitchcraft.UI
             EventManager.RemoveListener<GameStateChangedEvent>(OnGameStateChanged);
         }
 
-        private void Start()
+        private void OnEnable()
         {
-            if (_slotPrefab == null || _container == null) return;
-
-            foreach (var slotType in SlotOrder)
+            if (!_slotsCreated)
             {
-                var go = Instantiate(_slotPrefab, _container);
-                go.GetComponent<UI_EquipmentSlot>().Initialize(slotType);
+                if (_slotPrefab == null || _container == null) return;
+                foreach (var slotType in SlotOrder)
+                {
+                    var go = Instantiate(_slotPrefab, _container);
+                    go.GetComponent<UI_EquipmentSlot>().Initialize(slotType);
+                }
+                _slotsCreated = true;
+                return; // Initialize() already refreshed each slot
+            }
+
+            // Sync all slots with current state — covers events that fired while panel was inactive
+            foreach (Transform child in _container)
+            {
+                var slot = child.GetComponent<UI_EquipmentSlot>();
+                slot?.Refresh(EquipmentManager.Instance?.GetEquippedItem(slot.SlotType));
             }
         }
 

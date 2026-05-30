@@ -195,10 +195,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00781bc9a22e44d42bbb7b34befda186, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   groundingOffset: 0.17
   forwardOffset: 0
+  _worldSpacePositioning: 1
 --- !u!114 &2735805874352344684
 MonoBehaviour:
   m_ObjectHideFlags: 0

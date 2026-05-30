@@ -46,11 +46,8 @@ namespace ProjectWitchcraft.BuildingSystem
         {
             _rotatableSprite = GetComponentInChildren<RotatableSprite>();
             _collider = GetComponent<Collider>();
-            if (_collider != null)
-            {
-                Vector3 size = _collider.bounds.size;
-                Size = new Vector3Int(Mathf.RoundToInt(size.x), Mathf.RoundToInt(size.y), Mathf.Max(1, Mathf.RoundToInt(size.z)));
-            }
+            if (itemData != null)
+                Size = new Vector3Int(itemData.size.x, 1, itemData.size.y);
         }
 
         // Disables the collider and re-enables it only once the CharacterController is
