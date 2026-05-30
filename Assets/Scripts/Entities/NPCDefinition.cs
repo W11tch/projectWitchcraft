@@ -3,11 +3,11 @@ using ProjectWitchcraft.Factions;
 
 namespace ProjectWitchcraft.Entities
 {
-    [CreateAssetMenu(fileName = "New Enemy", menuName = "ProjectWitchcraft/Enemy Definition")]
-    public class EnemyDefinition : ScriptableObject
+    [CreateAssetMenu(fileName = "New NPC", menuName = "ProjectWitchcraft/NPC Definition")]
+    public class NPCDefinition : ScriptableObject
     {
         [Header("Identity")]
-        [SerializeField] private string _enemyName;
+        [SerializeField] private string _npcName;
         [SerializeField] private FactionDefinition _faction;
 
         [Header("Awareness")]
@@ -18,7 +18,7 @@ namespace ProjectWitchcraft.Entities
         [Header("Behaviour Weights")]
         [Range(0f, 1f)] [SerializeField] private float _aggressionWeight = 0.5f;
 
-        public string EnemyName => _enemyName;
+        public string NPCName => _npcName;
         public FactionDefinition Faction => _faction;
         public float VisionRange => _visionRange;
         public float VisionAngle => _visionAngle;
