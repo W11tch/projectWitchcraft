@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Core::ProjectWitchcraft.Core.EquipmentItemData
   Name: Worn ring
   Icon: {fileID: 21300000, guid: 44f03e72737872140affea4747d719c2, type: 3}
-  maxStackSize: 9999
+  maxStackSize: 1
   description: An old, worn up ring.
   _assetGuid: 56f4eab69d43cb5469edb41b17a43cb3
   _slot: 9
