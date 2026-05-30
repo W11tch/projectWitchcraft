@@ -62,16 +62,11 @@ namespace ProjectWitchcraft.UI
             var inv = InventoryManager.Instance;
             if (inv == null) { Debug.LogError("[DebugTools] InventoryManager.Instance is null."); return; }
 
-            int count = 0;
             foreach (var itemData in _assetRegistry.AllItemsOfAllTypes)
             {
                 if (itemData != null)
-                {
                     inv.AddItem(itemData, Mathf.Min(amountToAdd, itemData.maxStackSize));
-                    count++;
-                }
             }
-            Debug.Log($"[DebugTools] GiveAllItems: attempted {count} items.");
         }
 
         public void RepairEverything()

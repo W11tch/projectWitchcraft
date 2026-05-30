@@ -89,7 +89,6 @@ namespace ProjectWitchcraft.Core
         public IReadOnlyList<WeaponItemData> AllWeapons => _weapons;
         public IReadOnlyList<ToolItemData> AllTools => _tools;
 
-        // All registered items across every type — use this instead of ItemDatabase.
         public IEnumerable<ItemData> AllItemsOfAllTypes
         {
             get

@@ -78,11 +78,6 @@ namespace ProjectWitchcraft.Managers
                 {
                     newTarget = hit.collider.GetComponent<IInteractable>();
                 }
-                //if (newTarget == null)
-                //{
-                    // DEBUG: The object was hit, but it's missing the IInteractable component (like ChestController).
-                   // Debug.Log($"Object {hit.collider.name} was hit, but it has no IInteractable component.", hit.collider.gameObject);
-                //}
             }
 
             if (newTarget != _currentTarget)
