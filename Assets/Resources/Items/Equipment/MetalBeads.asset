@@ -17,7 +17,7 @@ MonoBehaviour:
   maxStackSize: 1
   description: Very heavy.
   _assetGuid: 27f47936e87f696439d2ff8c9da68696
-  _slot: 5
+  _slot: 4
   _maxDurability: 100
   _affixes:
   - Stat: {fileID: 11400000, guid: 714ab681ae9a03a4ab5aaf4cd17d4eab, type: 2}
