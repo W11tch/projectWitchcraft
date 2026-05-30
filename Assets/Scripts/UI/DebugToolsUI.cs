@@ -14,6 +14,7 @@ namespace ProjectWitchcraft.UI
         [Header("UI & Settings")]
         [SerializeField] private GameObject debugPanel;
         [SerializeField] private int amountToAdd = 100;
+        [SerializeField] private int amountToDamage = 50;
         [SerializeField] private Toggle flyModeToggle;
         [SerializeField] private Toggle destroyModeToggle;
 
@@ -67,6 +68,11 @@ namespace ProjectWitchcraft.UI
                 if (itemData != null)
                     inv.AddItem(itemData, Mathf.Min(amountToAdd, itemData.maxStackSize));
             }
+        }
+
+        public void DamageAllEquipment()
+        {
+            EquipmentManager.Instance?.DamageAll(amountToDamage);
         }
 
         public void RepairEverything()

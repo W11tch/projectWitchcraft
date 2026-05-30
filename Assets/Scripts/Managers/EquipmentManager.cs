@@ -101,6 +101,16 @@ namespace ProjectWitchcraft.Managers
             }
         }
 
+        // Debug helper — reduces all equipped item durability by the given amount.
+        public void DamageAll(int amount)
+        {
+            foreach (var instance in _equippedItems.Values)
+            {
+                if (instance != null && instance.HasDurability)
+                    instance.CurrentDurability = Mathf.Max(0, instance.CurrentDurability - amount);
+            }
+        }
+
         private bool IsValidForSlot(ItemInstance instance, EquipmentSlot slot)
         {
             if (instance.Definition is EquipmentItemData equip)

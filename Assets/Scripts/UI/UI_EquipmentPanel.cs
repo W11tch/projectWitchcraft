@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using ProjectWitchcraft.Core;
 using ProjectWitchcraft.Managers;
 
@@ -26,7 +27,6 @@ namespace ProjectWitchcraft.UI
 
         private void Awake()
         {
-            gameObject.SetActive(false);
             EventManager.AddListener<GameStateChangedEvent>(OnGameStateChanged);
         }
 
@@ -46,6 +46,7 @@ namespace ProjectWitchcraft.UI
                     go.GetComponent<UI_EquipmentSlot>().Initialize(slotType);
                 }
                 _slotsCreated = true;
+                LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_container);
                 return; // Initialize() already refreshed each slot
             }
 
