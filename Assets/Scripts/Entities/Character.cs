@@ -20,8 +20,5 @@ namespace ProjectWitchcraft.Entities
             Faction = GetComponent<FactionMember>();
         }
 
-        // Stubs — implemented fully in Phase 3 when HealthComponent is added.
-        public virtual void TakeDamage(float amount, Entity source) { }
-        public virtual void Die() { }
     }
 }

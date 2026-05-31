@@ -29,6 +29,10 @@ namespace ProjectWitchcraft.Stats
 
         private readonly Dictionary<StatDefinition, float> _cachedStatValues = new Dictionary<StatDefinition, float>();
 
+        // Fires whenever a modifier is added or removed — subscribe once to stay in sync
+        // with equipment changes, buffs, debuffs, and any future modifier source.
+        public event System.Action<StatDefinition, float> OnStatChanged;
+
         /// <summary>
         /// A helper class to associate a StatDefinition with a list of its modifiers.
         /// </summary>
@@ -64,6 +68,7 @@ namespace ProjectWitchcraft.Stats
         /// <param name="source">The source of the modifiers to remove.</param>
         public void RemoveModifiersFromSource(object source)
         {
+            var changed = new HashSet<StatDefinition>();
             foreach (var (stat, statMods) in _statModifiers)
             {
                 for (int i = statMods.Count - 1; i >= 0; i--)
@@ -72,9 +77,12 @@ namespace ProjectWitchcraft.Stats
                     {
                         statMods.RemoveAt(i);
                         _cachedStatValues.Remove(stat);
+                        changed.Add(stat);
                     }
                 }
             }
+            foreach (var stat in changed)
+                OnStatChanged?.Invoke(stat, GetStatValue(stat));
         }
 
         /// <summary>
@@ -98,6 +106,7 @@ namespace ProjectWitchcraft.Stats
                 _statModifiers[stat] = new List<StatModifier>();
             _statModifiers[stat].Add(mod);
             _cachedStatValues.Remove(stat);
+            OnStatChanged?.Invoke(stat, GetStatValue(stat));
         }
 
         private float CalculateStatValue(StatDefinition stat)

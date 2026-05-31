@@ -20,6 +20,6 @@ MonoBehaviour:
   _slot: 4
   _maxDurability: 100
   _affixes:
-  - Stat: {fileID: 11400000, guid: 714ab681ae9a03a4ab5aaf4cd17d4eab, type: 2}
-    Value: 0.5
-    Stage: 300
+  - Stat: {fileID: 11400000, guid: be19608700bf60d4e801fc621f9aa9d1, type: 2}
+    Value: 50
+    Stage: 100

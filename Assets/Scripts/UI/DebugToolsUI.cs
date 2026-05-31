@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using ProjectWitchcraft.Managers;
 using ProjectWitchcraft.Core;
+using ProjectWitchcraft.Entities;
 
 namespace ProjectWitchcraft.UI
 {
@@ -15,6 +16,7 @@ namespace ProjectWitchcraft.UI
         [SerializeField] private GameObject debugPanel;
         [SerializeField] private int amountToAdd = 100;
         [SerializeField] private int amountToDamage = 50;
+        [SerializeField] private int amountToDamagePlayer = 25;
         [SerializeField] private Toggle flyModeToggle;
         [SerializeField] private Toggle destroyModeToggle;
 
@@ -68,6 +70,30 @@ namespace ProjectWitchcraft.UI
                 if (itemData != null)
                     inv.AddItem(itemData, Mathf.Min(amountToAdd, itemData.maxStackSize));
             }
+        }
+
+        public void HurtPlayer()
+        {
+            var player = GameReferences.Instance?.PlayerTransform;
+            if (player == null) { Debug.LogWarning("[DebugTools] PlayerTransform not registered."); return; }
+            var damageable = player.GetComponent<IDamageable>();
+            if (damageable == null) { Debug.LogWarning("[DebugTools] Player has no IDamageable component."); return; }
+            damageable.TakeDamage(new HitData
+            {
+                Damage = amountToDamagePlayer,
+                Type = DamageType.Physical,
+                WorldPosition = player.position,
+                Direction = Vector3.zero
+            });
+        }
+
+        public void GetFullHealth()
+        {
+            var player = GameReferences.Instance?.PlayerTransform;
+            if (player == null) { Debug.LogWarning("[DebugTools] PlayerTransform not registered."); return; }
+            var health = player.GetComponent<HealthComponent>();
+            if (health == null) { Debug.LogWarning("[DebugTools] Player has no HealthComponent."); return; }
+            health.Heal(health.MaxHealth);
         }
 
         public void DamageAllEquipment()
