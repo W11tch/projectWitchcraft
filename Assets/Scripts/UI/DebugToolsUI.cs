@@ -14,6 +14,7 @@ namespace ProjectWitchcraft.UI
 
         [Header("UI & Settings")]
         [SerializeField] private GameObject debugPanel;
+        [SerializeField] private GameObject _targetDummyPrefab;
         [SerializeField] private int amountToAdd = 100;
         [SerializeField] private int amountToDamage = 50;
         [SerializeField] private int amountToDamagePlayer = 25;
@@ -94,6 +95,15 @@ namespace ProjectWitchcraft.UI
             var health = player.GetComponent<HealthComponent>();
             if (health == null) { Debug.LogWarning("[DebugTools] Player has no HealthComponent."); return; }
             health.Heal(health.MaxHealth);
+        }
+
+        public void SpawnTargetDummy()
+        {
+            Debug.Log("[DebugTools] SpawnTargetDummy called");
+            if (_targetDummyPrefab == null) { Debug.LogError("[DebugTools] Target dummy prefab not assigned."); return; }
+            var player = GameReferences.Instance?.PlayerTransform;
+            Vector3 spawnPos = player != null ? player.position + player.forward * 3f : Vector3.zero;
+            Instantiate(_targetDummyPrefab, spawnPos, Quaternion.identity);
         }
 
         public void DamageAllEquipment()

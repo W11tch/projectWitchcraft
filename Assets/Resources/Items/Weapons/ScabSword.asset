@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a469b34223c9454db29fb119aeed893, type: 3}
+  m_Name: ScabSword
+  m_EditorClassIdentifier: Core::ProjectWitchcraft.Core.WeaponItemData
+  Name: Scab Sword
+  Icon: {fileID: 21300000, guid: 018105a39900a75499718b68db3589aa, type: 3}
+  maxStackSize: 1
+  description: 'A sword made from the coagulated blood of ancient creature. The first
+    weapon a witch make and learn to use in their path. '
+  _assetGuid: 53ccf256a27674d4f9c8bf3fb4d62cc1
+  _isTwoHanded: 0
+  _maxDurability: 100
+  _affixes: []
+  _attackDefinition: {fileID: 11400000, guid: 4c80a841cba6c174ebe0fba1f521005a, type: 2}

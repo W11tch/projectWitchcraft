@@ -10,6 +10,14 @@ namespace ProjectWitchcraft.Player
     public class PlayerController : MonoBehaviour
     {
         public Vector2 MoveInput { get; private set; }
+        public int ActiveHotbarIndex { get; private set; } = 0;
+
+        private PlayerCombat _combat;
+
+        private void Awake()
+        {
+            _combat = GetComponent<PlayerCombat>();
+        }
 
         public void OnMove(InputAction.CallbackContext context)
         {
@@ -18,6 +26,9 @@ namespace ProjectWitchcraft.Player
 
         public void OnAttack(InputAction.CallbackContext context)
         {
+            Debug.Log($"[Combat] OnAttack called — phase={context.phase}  _combat={(_combat != null ? "OK" : "NULL")}");
+            if (context.performed)
+                _combat?.TryAttack();
         }
 
         public void OnInteract(InputAction.CallbackContext context)
@@ -45,6 +56,7 @@ namespace ProjectWitchcraft.Player
             if (int.TryParse(context.control.name, out int keyNumber))
             {
                 int slotIndex = keyNumber == 0 ? 9 : keyNumber - 1;
+                ActiveHotbarIndex = slotIndex;
 
                 var inventoryManager = InventoryManager.Instance;
                 if (slotIndex < 0 || slotIndex >= inventoryManager.HotbarSlots.Count) return;
@@ -64,6 +76,10 @@ namespace ProjectWitchcraft.Player
                 if (slot.Instance?.Definition is PlaceableItemData placeableItem)
                 {
                     EventManager.TriggerEvent(new PlacementModeRequestedEvent { ItemData = placeableItem });
+                }
+                else
+                {
+                    EventManager.TriggerEvent(new CancelActionTriggeredEvent());
                 }
             }
         }

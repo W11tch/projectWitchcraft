@@ -85,5 +85,17 @@ namespace ProjectWitchcraft.Entities
                 Target = transform
             });
         }
+
+        // Restores health to full regardless of alive state — use for respawning entities only.
+        public void ResetHealth()
+        {
+            CurrentHealth = MaxHealth;
+            EventManager.TriggerEvent(new HealedEvent
+            {
+                NewHealth = CurrentHealth,
+                MaxHealth = MaxHealth,
+                Target = transform
+            });
+        }
     }
 }

@@ -10,10 +10,12 @@ namespace ProjectWitchcraft.Core
         [SerializeField] private bool _isTwoHanded;
         [SerializeField] private int _maxDurability = 100;
         [SerializeField] private List<EquipmentAffix> _affixes = new();
+        [SerializeField] private AttackDefinition _attackDefinition;
 
         public bool IsTwoHanded => _isTwoHanded;
         public int MaxDurability => _maxDurability;
         public IReadOnlyList<EquipmentAffix> Affixes => _affixes;
+        public AttackDefinition AttackDefinition => _attackDefinition;
 
         public override float GetMaxDurability() => _maxDurability;
     }
