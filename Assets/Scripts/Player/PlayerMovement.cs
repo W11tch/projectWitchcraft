@@ -116,8 +116,8 @@ namespace ProjectWitchcraft.Player
         {
             float checkDistance = _characterController.radius + 0.1f;
 
-            Vector3 halfWidth = transform.right * (_characterController.radius * footprintSizeMultiplier);
-            Vector3 halfDepth = transform.forward * (_characterController.radius * footprintSizeMultiplier);
+            Vector3 halfWidth = Vector3.right * (_characterController.radius * footprintSizeMultiplier);
+            Vector3 halfDepth = Vector3.forward * (_characterController.radius * footprintSizeMultiplier);
 
             Vector3 frontRight = transform.position + halfWidth + halfDepth;
             Vector3 frontLeft = transform.position - halfWidth + halfDepth;
