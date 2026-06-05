@@ -6049,6 +6049,9 @@ MonoBehaviour:
   _enemyLayer:
     serializedVersion: 2
     m_Bits: 2048
+  _blockerLayer:
+    serializedVersion: 2
+    m_Bits: 128
   _damageStatDefinition: {fileID: 11400000, guid: 714ab681ae9a03a4ab5aaf4cd17d4eab, type: 2}
   _animator: {fileID: 0}
 --- !u!114 &1375427812

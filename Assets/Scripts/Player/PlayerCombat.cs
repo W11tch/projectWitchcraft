@@ -10,12 +10,14 @@ namespace ProjectWitchcraft.Player
     public class PlayerCombat : MonoBehaviour
     {
         [SerializeField] private LayerMask _enemyLayer;
+        [SerializeField] private LayerMask _blockerLayer;
         [SerializeField] private StatDefinition _damageStatDefinition;
         [SerializeField] private Animator _animator;
 
         private PlayerController _controller;
         private CharacterStats _stats;
         private AttackVFX _attackVFX;
+        private CharacterController _body;
         private float _nextAttackTime;
         private readonly HashSet<Collider> _hitThisSwing = new();
 
@@ -24,6 +26,7 @@ namespace ProjectWitchcraft.Player
             _controller = GetComponent<PlayerController>();
             _stats = GetComponent<CharacterStats>();
             _attackVFX = GetComponent<AttackVFX>();
+            _body = GetComponent<CharacterController>();
         }
 
         public void TryAttack()
@@ -72,6 +75,11 @@ namespace ProjectWitchcraft.Player
 
             _hitThisSwing.Clear();
 
+            // LoS origin = player body center. Cast from here (never inside cover, since the
+            // CharacterController collides with blocks) rather than the forward-pushed swing
+            // center, which can sit inside a block the player is hugging.
+            Vector3 losOrigin = _body != null ? _body.bounds.center : transform.position;
+
             foreach (Collider col in hits)
             {
                 if (!_hitThisSwing.Add(col)) continue;
@@ -81,6 +89,13 @@ namespace ProjectWitchcraft.Player
 
                 if (def.ArcAngleDegrees < 360f &&
                     Vector3.Angle(transform.forward, toEnemy.normalized) > def.ArcAngleDegrees * 0.5f)
+                    continue;
+
+                // Line-of-sight: skip enemies hidden behind a blocker (walls, blocks, chests, upper placeables).
+                // Cast from the player body center to the enemy's collider center.
+                bool blocked = Physics.Linecast(losOrigin, col.bounds.center, _blockerLayer);
+                Debug.DrawLine(losOrigin, col.bounds.center, blocked ? Color.red : Color.green, 0.4f);
+                if (blocked)
                     continue;
 
                 var damageable = col.GetComponent<IDamageable>();
