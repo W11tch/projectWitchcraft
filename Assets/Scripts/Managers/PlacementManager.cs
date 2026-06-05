@@ -136,8 +136,6 @@ namespace ProjectWitchcraft.Managers
                 finalObject.Placed = true;
 
                 _chunkManager.PlaceObject(finalObject);
-
-                finalObject.ActivateColliderSafely();
             }
         }
 
@@ -291,8 +289,6 @@ namespace ProjectWitchcraft.Managers
                 }
             }
 
-            // Reject placement if the object's footprint would overlap the player's CharacterController.
-            // Uses the same AABB approximation as ActivateColliderSafely so both systems agree.
             var playerTransform = GameReferences.Instance.PlayerTransform;
             if (playerTransform != null)
             {

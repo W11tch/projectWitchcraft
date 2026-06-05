@@ -223,8 +223,22 @@ namespace ProjectWitchcraft.Managers
             var parent = PlacementManager.Instance?.PlacedObjectsParent;
             int spawned = 0;
 
+            // Skip exact duplicates (same item at the same position). Corrupted saves can contain two
+            // entries for one cell; the second would land in the upperObject slot at ground height,
+            // blocking on-top placement. Legitimate stacks differ in Y, so their key differs and they
+            // are kept. Keeps restore idempotent even if an entry list is dirty.
+            var restoredKeys = new HashSet<(long, long, long, string)>();
+
             foreach (var data in placedObjects)
             {
+                var key = (
+                    (long)Mathf.RoundToInt(data.Position.x * 100f),
+                    (long)Mathf.RoundToInt(data.Position.y * 100f),
+                    (long)Mathf.RoundToInt(data.Position.z * 100f),
+                    data.itemGuid);
+                if (!restoredKeys.Add(key))
+                    continue;
+
                 var itemData = _assetRegistry.GetPlaceableByGuid(data.itemGuid);
                 if (itemData == null)
                 {

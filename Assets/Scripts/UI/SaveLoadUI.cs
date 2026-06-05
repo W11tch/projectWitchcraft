@@ -38,6 +38,7 @@ namespace ProjectWitchcraft.UI
 
         private void OnClearButtonClicked()
         {
+            SaveManager.Instance.ClearSave();
         }
     }
 }

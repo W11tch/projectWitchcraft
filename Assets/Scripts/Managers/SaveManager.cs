@@ -11,6 +11,7 @@ namespace ProjectWitchcraft.Managers
     {
         private string _savePath;
         private const string SaveFileName = "savegame.json";
+        private bool _isLoading;
 
         private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
         {
@@ -56,51 +57,68 @@ namespace ProjectWitchcraft.Managers
             }
         }
 
+        public void ClearSave()
+        {
+            if (File.Exists(_savePath))
+                File.Delete(_savePath);
+        }
+
         public void LoadGame()
         {
             if (!File.Exists(_savePath)) return;
+            // Guard against overlapping loads. RestoreObjectsCoroutine spans multiple frames, so a
+            // second load triggered mid-restore would interleave with the first and double-register
+            // placed objects (corrupting the save). One load at a time.
+            if (_isLoading) return;
+            _isLoading = true;
             StartCoroutine(LoadGameCoroutine());
         }
 
         private IEnumerator LoadGameCoroutine()
         {
-            GameManager.Instance.UpdateState(GameState.Loading);
-
-            // File read and JSON deserialization on a background thread.
-            string json = null;
-            SaveData saveData = null;
-            System.Exception loadError = null;
-
-            var task = Task.Run(() =>
+            try
             {
-                json = File.ReadAllText(_savePath);
-                saveData = JsonConvert.DeserializeObject<SaveData>(json, JsonSettings);
-            });
+                GameManager.Instance.UpdateState(GameState.Loading);
 
-            yield return new WaitUntil(() => task.IsCompleted);
+                // File read and JSON deserialization on a background thread.
+                string json = null;
+                SaveData saveData = null;
 
-            if (task.IsFaulted)
-            {
-                Debug.LogError($"[SaveManager] Load failed: {task.Exception?.InnerException?.Message}");
+                var task = Task.Run(() =>
+                {
+                    json = File.ReadAllText(_savePath);
+                    saveData = JsonConvert.DeserializeObject<SaveData>(json, JsonSettings);
+                });
+
+                yield return new WaitUntil(() => task.IsCompleted);
+
+                if (task.IsFaulted)
+                {
+                    Debug.LogError($"[SaveManager] Load failed: {task.Exception?.InnerException?.Message}");
+                    GameManager.Instance.UpdateState(GameState.Playing);
+                    yield break;
+                }
+
+                if (saveData == null)
+                {
+                    Debug.LogError("[SaveManager] Deserialized save data is null.");
+                    GameManager.Instance.UpdateState(GameState.Playing);
+                    yield break;
+                }
+
+                // Fast listeners: inventory, player position, equipment, world items.
+                EventManager.TriggerEvent(new ApplySaveDataEvent { SaveData = saveData });
+
+                // Heavy listener: placed objects — spread across frames.
+                yield return ChunkManager.Instance.RestoreObjectsCoroutine(saveData.placedObjects);
+
                 GameManager.Instance.UpdateState(GameState.Playing);
-                yield break;
+                EventManager.TriggerEvent(new GameLoadedEvent());
             }
-
-            if (saveData == null)
+            finally
             {
-                Debug.LogError("[SaveManager] Deserialized save data is null.");
-                GameManager.Instance.UpdateState(GameState.Playing);
-                yield break;
+                _isLoading = false;
             }
-
-            // Fast listeners: inventory, player position, equipment, world items.
-            EventManager.TriggerEvent(new ApplySaveDataEvent { SaveData = saveData });
-
-            // Heavy listener: placed objects — spread across frames.
-            yield return ChunkManager.Instance.RestoreObjectsCoroutine(saveData.placedObjects);
-
-            GameManager.Instance.UpdateState(GameState.Playing);
-            EventManager.TriggerEvent(new GameLoadedEvent());
         }
     }
 }

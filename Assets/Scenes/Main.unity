@@ -1593,7 +1593,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee2e5da30a4ca3040b16cf874acbc5ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerModel: {fileID: 0}
+  playerModel: {fileID: 1375427801}
   offset: {x: 0, y: 10, z: -5}
   followSpeed: 5
 --- !u!1 &347727162
@@ -7963,7 +7963,7 @@ MonoBehaviour:
   _assetRegistry: {fileID: 11400000, guid: 0186f186ea8a83b4083cf445e8e0f0cc, type: 2}
   debugPanel: {fileID: 866218789}
   _targetDummyPrefab: {fileID: 4613462143197905961, guid: e4f3800a948e57647923715a3a53b04d, type: 3}
-  amountToAdd: 50
+  amountToAdd: 150
   amountToDamage: 50
   amountToDamagePlayer: 25
   flyModeToggle: {fileID: 327479261}
