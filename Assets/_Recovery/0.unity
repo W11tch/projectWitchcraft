@@ -5657,7 +5657,6 @@ GameObject:
   - component: {fileID: 1375427810}
   - component: {fileID: 1375427811}
   - component: {fileID: 1375427812}
-  - component: {fileID: 1375427813}
   m_Layer: 10
   m_Name: Player
   m_TagString: Player
@@ -6063,20 +6062,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b2a8d23499dc2c4982fd32671d658b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ProjectWitchcraft.Player::ProjectWitchcraft.Player.PlayerAim
---- !u!114 &1375427813
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1375427800}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f2410338e92913d4c8154dc22ee26d05, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ProjectWitchcraft.Player::ProjectWitchcraft.Player.AttackVFX
-  _segments: 16
-  _lineMaterial: {fileID: 2100000, guid: 63b2fffa398db2648a521cd68ccbd497, type: 2}
 --- !u!1 &1399327942
 GameObject:
   m_ObjectHideFlags: 0

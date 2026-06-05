@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 899c65d1560344844bfd4a7f1d94549d, type: 3}
+  m_Name: ScabSwordSlash
+  m_EditorClassIdentifier: Core::ProjectWitchcraft.Core.AttackDefinition
+  ShapeType: 1
+  HitBoxSize: {x: 1.5, y: 1, z: 1.5}
+  HitRadius: 1.2
+  HitOffset: {x: 0, y: 0, z: 0.6}
+  ArcAngleDegrees: 110
+  DamageMultiplier: 1
+  DamageType: 0
+  Cooldown: 0.5
+  AnimationTrigger: Attack
+  ArcColor: {r: 0.4056604, g: 0.001913497, b: 0.001913497, a: 0.8784314}
+  ArcWidth: 0.05
+  ArcFadeDuration: 0.25

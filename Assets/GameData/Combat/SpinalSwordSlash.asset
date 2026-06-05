@@ -10,14 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 899c65d1560344844bfd4a7f1d94549d, type: 3}
-  m_Name: SwordSlash
+  m_Name: SpinalSwordSlash
   m_EditorClassIdentifier: Core::ProjectWitchcraft.Core.AttackDefinition
-  ShapeType: 0
+  ShapeType: 1
   HitBoxSize: {x: 1.5, y: 1, z: 1.5}
-  HitRadius: 1.2
+  HitRadius: 2
   HitOffset: {x: 0, y: 0, z: 0.6}
-  ArcAngleDegrees: 110
+  ArcAngleDegrees: 100
   DamageMultiplier: 1
   DamageType: 0
   Cooldown: 0.5
   AnimationTrigger: Attack
+  ArcColor: {r: 1, g: 0.8941177, b: 0.7686275, a: 0.90588236}
+  ArcWidth: 0.05
+  ArcFadeDuration: 0.25

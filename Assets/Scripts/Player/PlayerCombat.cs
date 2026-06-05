@@ -15,6 +15,7 @@ namespace ProjectWitchcraft.Player
 
         private PlayerController _controller;
         private CharacterStats _stats;
+        private AttackVFX _attackVFX;
         private float _nextAttackTime;
         private readonly HashSet<Collider> _hitThisSwing = new();
 
@@ -22,19 +23,15 @@ namespace ProjectWitchcraft.Player
         {
             _controller = GetComponent<PlayerController>();
             _stats = GetComponent<CharacterStats>();
+            _attackVFX = GetComponent<AttackVFX>();
         }
 
         public void TryAttack()
         {
-            Debug.Log("[Combat] TryAttack called");
             if (Time.time < _nextAttackTime) return;
 
             AttackDefinition def = GetEquippedWeaponDefinition();
-            if (def == null)
-            {
-                Debug.LogWarning($"[Combat] No AttackDefinition — hotbar index {(_controller != null ? _controller.ActiveHotbarIndex : -99)}, slot empty or weapon has no AttackDefinition assigned");
-                return;
-            }
+            if (def == null) return;
 
             _nextAttackTime = Time.time + def.Cooldown;
 
@@ -52,11 +49,10 @@ namespace ProjectWitchcraft.Player
 
             if (def.ArcAngleDegrees < 360f)
             {
-                float halfArc = def.ArcAngleDegrees * 0.5f;
-                float reach = def.ShapeType == AttackDefinition.HitShapeType.Box
-                    ? def.HitBoxSize.z : def.HitRadius;
-                Debug.DrawRay(transform.position, Quaternion.Euler(0f, -halfArc, 0f) * transform.forward * reach, Color.yellow, 0.4f);
-                Debug.DrawRay(transform.position, Quaternion.Euler(0f,  halfArc, 0f) * transform.forward * reach, Color.yellow, 0.4f);
+                float halfArc    = def.ArcAngleDegrees * 0.5f;
+                float debugReach = def.ShapeType == AttackDefinition.HitShapeType.Box ? def.HitBoxSize.z : def.HitRadius;
+                Debug.DrawRay(transform.position, Quaternion.Euler(0f, -halfArc, 0f) * transform.forward * debugReach, Color.yellow, 0.4f);
+                Debug.DrawRay(transform.position, Quaternion.Euler(0f,  halfArc, 0f) * transform.forward * debugReach, Color.yellow, 0.4f);
             }
 
             Collider[] hits = def.ShapeType switch
@@ -95,10 +91,12 @@ namespace ProjectWitchcraft.Player
                     Damage        = baseDamage * def.DamageMultiplier,
                     Type          = def.DamageType,
                     Source        = this,
-                    WorldPosition = col.transform.position,
+                    WorldPosition = col.bounds.center,
                     Direction     = toEnemy.sqrMagnitude > 0f ? toEnemy.normalized : transform.forward
                 });
             }
+
+            _attackVFX?.Play(transform, def);
         }
 
         private AttackDefinition GetEquippedWeaponDefinition()

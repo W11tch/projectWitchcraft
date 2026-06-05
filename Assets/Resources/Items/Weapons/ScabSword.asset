@@ -15,8 +15,8 @@ MonoBehaviour:
   Name: Scab Sword
   Icon: {fileID: 21300000, guid: 018105a39900a75499718b68db3589aa, type: 3}
   maxStackSize: 1
-  description: 'A sword made from the coagulated blood of ancient creature. The first
-    weapon a witch make and learn to use in their path. '
+  description: 'A sword made from the congealed blood of ancient creature. The first
+    weapon a witch makes and learn to use in their path. '
   _assetGuid: 53ccf256a27674d4f9c8bf3fb4d62cc1
   _isTwoHanded: 0
   _maxDurability: 100

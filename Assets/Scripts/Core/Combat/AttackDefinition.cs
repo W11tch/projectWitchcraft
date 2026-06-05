@@ -24,5 +24,10 @@ namespace ProjectWitchcraft.Core
 
         [Header("Animation")]
         public string AnimationTrigger = "Attack";
+
+        [Header("VFX")]
+        public Color ArcColor = Color.white;
+        public float ArcWidth = 0.05f;
+        public float ArcFadeDuration = 0.25f;
     }
 }

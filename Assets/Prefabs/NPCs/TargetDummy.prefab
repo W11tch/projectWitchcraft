@@ -51,7 +51,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: ProjectWitchcraft.Stats::ProjectWitchcraft.Stats.CharacterStats
   baseStats:
   - Stat: {fileID: 11400000, guid: be19608700bf60d4e801fc621f9aa9d1, type: 2}
-    Value: 100
+    Value: 10000
 --- !u!114 &2894198777031547478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -127,6 +127,7 @@ GameObject:
   - component: {fileID: 1735650121570552330}
   - component: {fileID: 1914747516249826897}
   - component: {fileID: 1060937082912914592}
+  - component: {fileID: 4161417172338225919}
   m_Layer: 11
   m_Name: Sprite
   m_TagString: Untagged
@@ -223,3 +224,19 @@ MonoBehaviour:
   groundingOffset: 0
   forwardOffset: 0
   _worldSpacePositioning: 0
+--- !u!114 &4161417172338225919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4793480462388104399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5474b431cedf344fa0f93d9594d7f14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ProjectWitchcraft.Entities::ProjectWitchcraft.Entities.HitFlash
+  _flashColor: {r: 0.9811321, g: 0.041651815, b: 0.041651815, a: 0.5529412}
+  _flashDuration: 0.12
+  _bounceHeight: 0.12
+  _bounceDuration: 0.15
