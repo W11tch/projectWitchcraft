@@ -10,18 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a469b34223c9454db29fb119aeed893, type: 3}
-  m_Name: SpinalSword
+  m_Name: CarvingKnife
   m_EditorClassIdentifier: Core::ProjectWitchcraft.Core.WeaponItemData
-  Name: Spinal Sword
-  Icon: {fileID: 21300000, guid: e38f2677454691643867d67caddf5983, type: 3}
+  Name: Carving Knife
+  Icon: {fileID: 21300000, guid: bcb17a7df530c7c48bd61fe32eb7471a, type: 3}
   maxStackSize: 1
-  description: A slender sword made from the bones of a difform creature.
-  _assetGuid: c35ad8a48030b2a41a7dd972800900fd
+  description: A knife to carve the corpses of dead beasts and the flesh of live
+    ones alike.
+  _assetGuid: 525e9f1440f0eb3488ee319c946bfd0c
   _isTwoHanded: 0
   _maxDurability: 100
-  _affixes:
-  - Stat: {fileID: 11400000, guid: 714ab681ae9a03a4ab5aaf4cd17d4eab, type: 2}
-    Value: 0.5
-    Stage: 200
-  _attackDefinition: {fileID: 11400000, guid: 8a1568967ce79734c9bf671e268a4de4, type: 2}
-  _baseAttacksPerSecond: 1
+  _affixes: []
+  _attackDefinition: {fileID: 11400000, guid: a40510054c8249af87743541f016149d, type: 2}
+  _baseAttacksPerSecond: 2.5

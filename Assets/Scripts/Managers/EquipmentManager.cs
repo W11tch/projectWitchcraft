@@ -10,6 +10,10 @@ namespace ProjectWitchcraft.Managers
         [SerializeField] private AssetRegistry _assetRegistry;
 
         private readonly Dictionary<EquipmentSlot, ItemInstance> _equippedItems = new();
+        // The weapon currently selected in the active hotbar slot. Weapons aren't slot-equippable
+        // (WeaponItemData isn't EquipmentItemData), so their affixes are applied through this path
+        // instead of _equippedItems, using the instance as the modifier source.
+        private ItemInstance _activeWeapon;
         private bool _isOffHandActive = true;
 
         // Cached reference — fetched lazily once Player is in the scene.
@@ -61,6 +65,25 @@ namespace ProjectWitchcraft.Managers
             _equippedItems.Remove(slot);
             EventManager.TriggerEvent(new EquipmentChangedEvent { Slot = slot, NewItem = null });
             return instance;
+        }
+
+        // Applies the affixes of the weapon held in the active hotbar slot, removing those of the
+        // previously held weapon. Pass null (or a non-weapon) to clear. Idempotent — safe to call
+        // on every InventoryChangedEvent.
+        public void SetActiveWeapon(ItemInstance weapon)
+        {
+            if (weapon == null || weapon.IsEmpty || weapon.Definition is not WeaponItemData)
+                weapon = null;
+
+            if (ReferenceEquals(weapon, _activeWeapon)) return;
+
+            if (_activeWeapon != null)
+                RemoveModifiers(_activeWeapon);
+
+            _activeWeapon = weapon;
+
+            if (_activeWeapon != null)
+                ApplyModifiers(_activeWeapon);
         }
 
         // Called by PlayerController when the active hotbar item changes.

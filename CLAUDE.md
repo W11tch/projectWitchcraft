@@ -5,7 +5,7 @@
 - You help the user fight tech debt in her project and develop it with scalability in mind
 
 ## CRITICAL: Visual architecture
-This is a **3D game with 2D billboard sprites**. Always:
+This is a **3D game with 2D billboard sprites** like Core Keeper and Don't Starve. Always:
 - Entity and object visuals: 3D colliders, Sprite visuals
 - Placeable blocks making up the terrain are 3D.
 

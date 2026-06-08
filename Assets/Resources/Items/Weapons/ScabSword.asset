@@ -20,5 +20,9 @@ MonoBehaviour:
   _assetGuid: 53ccf256a27674d4f9c8bf3fb4d62cc1
   _isTwoHanded: 0
   _maxDurability: 100
-  _affixes: []
+  _affixes:
+  - Stat: {fileID: 11400000, guid: 8585dc22d69babf43a5ead3b4d2ab48d, type: 2}
+    Value: 0.5
+    Stage: 200
   _attackDefinition: {fileID: 11400000, guid: 4c80a841cba6c174ebe0fba1f521005a, type: 2}
+  _baseAttacksPerSecond: 1

@@ -19,8 +19,10 @@ MonoBehaviour:
   ArcAngleDegrees: 110
   DamageMultiplier: 1
   DamageType: 0
-  Cooldown: 0.5
+  WindupFraction: 0.15
+  ActiveFraction: 0.1
+  MoveSpeedFractionWhileSwinging: 0.2
   AnimationTrigger: Attack
   ArcColor: {r: 0.4056604, g: 0.001913497, b: 0.001913497, a: 0.8784314}
   ArcWidth: 0.05
-  ArcFadeDuration: 0.25
+  ArcFadeDuration: 0.1

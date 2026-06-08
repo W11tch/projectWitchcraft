@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 899c65d1560344844bfd4a7f1d94549d, type: 3}
-  m_Name: SpinalSwordSlash
+  m_Name: CarvingKnifeStab
   m_EditorClassIdentifier: Core::ProjectWitchcraft.Core.AttackDefinition
-  ShapeType: 1
-  HitBoxSize: {x: 1.5, y: 1, z: 1.5}
-  HitRadius: 2
-  HitOffset: {x: 0, y: 0, z: 0.6}
-  ArcAngleDegrees: 100
-  DamageMultiplier: 1
+  ShapeType: 2
+  HitBoxSize: {x: 0.6, y: 1, z: 1}
+  HitRadius: 0.2
+  HitOffset: {x: 0, y: 0, z: 0.8}
+  ArcAngleDegrees: 360
+  DamageMultiplier: 0.4
   DamageType: 0
-  WindupFraction: 0.3
-  ActiveFraction: 0.2
-  MoveSpeedFractionWhileSwinging: 0.2
+  WindupFraction: 0.1
+  ActiveFraction: 0.25
+  MoveSpeedFractionWhileSwinging: 0.3
   AnimationTrigger: Attack
-  ArcColor: {r: 1, g: 0.8941177, b: 0.7686275, a: 0.90588236}
-  ArcWidth: 0.05
-  ArcFadeDuration: 0.15
+  ArcColor: {r: 0.85, g: 0.9, b: 0.8, a: 0.85}
+  ArcWidth: 0.04
+  ArcFadeDuration: 0.08

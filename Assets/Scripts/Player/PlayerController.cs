@@ -19,6 +19,32 @@ namespace ProjectWitchcraft.Player
             _combat = GetComponent<PlayerCombat>();
         }
 
+        private void OnEnable()
+        {
+            EventManager.AddListener<InventoryChangedEvent>(OnInventoryChanged);
+        }
+
+        private void OnDisable()
+        {
+            EventManager.RemoveListener<InventoryChangedEvent>(OnInventoryChanged);
+        }
+
+        // Covers startup/after-load and any change to the active-slot weapon (pickup, move, consume).
+        private void OnInventoryChanged(InventoryChangedEvent e) => RefreshActiveWeapon();
+
+        // Applies the affixes of the weapon in the active hotbar slot (and removes the previous one's).
+        private void RefreshActiveWeapon()
+        {
+            var slots = InventoryManager.Instance?.HotbarSlots;
+            ItemInstance weapon = null;
+            if (slots != null && ActiveHotbarIndex >= 0 && ActiveHotbarIndex < slots.Count)
+            {
+                var slot = slots[ActiveHotbarIndex];
+                if (!slot.IsEmpty) weapon = slot.Instance;
+            }
+            EquipmentManager.Instance?.SetActiveWeapon(weapon);
+        }
+
         public void OnMove(InputAction.CallbackContext context)
         {
             MoveInput = context.ReadValue<Vector2>();
@@ -57,6 +83,7 @@ namespace ProjectWitchcraft.Player
             {
                 int slotIndex = keyNumber == 0 ? 9 : keyNumber - 1;
                 ActiveHotbarIndex = slotIndex;
+                RefreshActiveWeapon();
 
                 var inventoryManager = InventoryManager.Instance;
                 if (slotIndex < 0 || slotIndex >= inventoryManager.HotbarSlots.Count) return;

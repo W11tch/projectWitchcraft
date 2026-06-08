@@ -21,5 +21,8 @@ MonoBehaviour:
   _maxDurability: 100
   _affixes:
   - Stat: {fileID: 11400000, guid: 714ab681ae9a03a4ab5aaf4cd17d4eab, type: 2}
+    Value: 0
+    Stage: 200
+  - Stat: {fileID: 11400000, guid: 8585dc22d69babf43a5ead3b4d2ab48d, type: 2}
     Value: 0.5
     Stage: 200

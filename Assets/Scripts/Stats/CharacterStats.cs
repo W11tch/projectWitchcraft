@@ -178,5 +178,13 @@ namespace ProjectWitchcraft.Stats
             var baseStat = baseStats.FirstOrDefault(s => s.Stat == stat);
             return baseStat?.Value ?? 0f;
         }
+
+        // Editor convenience: tweaking a baseStats value in the Inspector during Play bypasses the
+        // cache (it's only invalidated when modifiers change), so clear it here to make live edits
+        // take effect on the next read. No runtime/gameplay impact.
+        private void OnValidate()
+        {
+            _cachedStatValues.Clear();
+        }
     }
 }
