@@ -15,10 +15,6 @@ namespace ProjectWitchcraft.Core
         [Range(0f, 360f)]
         public float ArcAngleDegrees = 110f;
 
-        [Header("Damage")]
-        public float DamageMultiplier = 1f;
-        public DamageType DamageType = DamageType.Physical;
-
         [Header("Swing")]
         [Range(0f, 1f)]
         [Tooltip("Portion of the swing cycle spent winding up before any hit registers (0-1). A pre-hit telegraph delay; 0 = hits start instantly at swing start. Windup + Active must not exceed 1; the remainder is recovery. Scales with attack speed.")]

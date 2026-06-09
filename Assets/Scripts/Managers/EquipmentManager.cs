@@ -8,6 +8,8 @@ namespace ProjectWitchcraft.Managers
     public class EquipmentManager : Singleton<EquipmentManager>
     {
         [SerializeField] private AssetRegistry _assetRegistry;
+        [Tooltip("The Damage stat. A held weapon's base damage is applied to it as an Override, replacing the player's base before flat/additive/multiplicative affixes stack.")]
+        [SerializeField] private StatDefinition _damageStat;
 
         private readonly Dictionary<EquipmentSlot, ItemInstance> _equippedItems = new();
         // The weapon currently selected in the active hotbar slot. Weapons aren't slot-equippable
@@ -148,18 +150,33 @@ namespace ProjectWitchcraft.Managers
 
         private void ApplyModifiers(ItemInstance instance)
         {
-            var affixes = GetAffixes(instance);
-            if (affixes == null || affixes.Count == 0) return;
+            var bonuses = new List<CharacterStats.StatBonus>();
 
-            var bonuses = new List<CharacterStats.StatBonus>(affixes.Count);
-            foreach (var affix in affixes)
+            // A held weapon's base damage overrides the player's base Damage stat; the affix
+            // flat/additive/multiplicative stages then stack on top (see CharacterStats pipeline).
+            if (instance.Definition is WeaponItemData weapon && _damageStat != null)
             {
                 bonuses.Add(new CharacterStats.StatBonus
                 {
-                    Stat = affix.Stat,
-                    Modifier = new StatModifier(affix.Value, affix.Stage, instance)
+                    Stat = _damageStat,
+                    Modifier = new StatModifier(weapon.BaseDamage, CalculationStage.Override, instance)
                 });
             }
+
+            var affixes = GetAffixes(instance);
+            if (affixes != null)
+            {
+                foreach (var affix in affixes)
+                {
+                    bonuses.Add(new CharacterStats.StatBonus
+                    {
+                        Stat = affix.Stat,
+                        Modifier = new StatModifier(affix.Value, affix.Stage, instance)
+                    });
+                }
+            }
+
+            if (bonuses.Count == 0) return;
             GetPlayerStats()?.AddBonuses(instance, bonuses);
         }
 

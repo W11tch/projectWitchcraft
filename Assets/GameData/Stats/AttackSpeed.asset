@@ -16,3 +16,4 @@ MonoBehaviour:
   description: 
   icon: {fileID: 0}
   category: 0
+  displayFormat: 1

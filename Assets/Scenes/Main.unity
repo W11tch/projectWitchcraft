@@ -4574,6 +4574,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ProjectWitchcraft.Managers::ProjectWitchcraft.Managers.EquipmentManager
   _assetRegistry: {fileID: 11400000, guid: 0186f186ea8a83b4083cf445e8e0f0cc, type: 2}
+  _damageStat: {fileID: 11400000, guid: 714ab681ae9a03a4ab5aaf4cd17d4eab, type: 2}
 --- !u!1 &1129238628
 GameObject:
   m_ObjectHideFlags: 0
@@ -6100,6 +6101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac70e07cbf5e775428afbcced26a80d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _baseMoveSpeed: 5
   _moveSpeedStat: {fileID: 11400000, guid: af1220240ce092345b1429ce1dece954, type: 2}
   footprintSizeMultiplier: 0
 --- !u!143 &1375427806
@@ -6141,9 +6143,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseStats:
   - Stat: {fileID: 11400000, guid: af1220240ce092345b1429ce1dece954, type: 2}
-    Value: 5
+    Value: 1
   - Stat: {fileID: 11400000, guid: 714ab681ae9a03a4ab5aaf4cd17d4eab, type: 2}
-    Value: 5
+    Value: 4
   - Stat: {fileID: 11400000, guid: be19608700bf60d4e801fc621f9aa9d1, type: 2}
     Value: 100
   - Stat: {fileID: 11400000, guid: 8585dc22d69babf43a5ead3b4d2ab48d, type: 2}

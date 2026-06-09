@@ -7,6 +7,8 @@ namespace ProjectWitchcraft.UI
     public class FloatingDamageNumber : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI _text;
+        [Tooltip("Extra height (world units) the number floats above the enemy's top.")]
+        [SerializeField] private float _worldYOffset = 0.25f;
 
         private RectTransform _rect;
         public System.Action<FloatingDamageNumber> OnFinished;
@@ -19,7 +21,7 @@ namespace ProjectWitchcraft.UI
             _text.color = Color.white;
             gameObject.SetActive(true);
             StopAllCoroutines();
-            StartCoroutine(FloatAndFade(worldPos));
+            StartCoroutine(FloatAndFade(worldPos + Vector3.up * _worldYOffset));
         }
 
         private IEnumerator FloatAndFade(Vector3 worldPos)

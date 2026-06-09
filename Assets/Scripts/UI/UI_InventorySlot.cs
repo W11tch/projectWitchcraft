@@ -13,6 +13,8 @@ namespace ProjectWitchcraft.UI
         [Header("UI Elements")]
         [SerializeField] private Image _itemIcon;
         [SerializeField] private TextMeshProUGUI _quantityText;
+        [Tooltip("Border/frame shown only on the active hotbar slot. Left unassigned on inventory slots.")]
+        [SerializeField] private GameObject _selectionHighlight;
         private InventoryManager _inventoryManager;
         private int _slotIndex;
         private InventoryType _slotType;
@@ -38,6 +40,12 @@ namespace ProjectWitchcraft.UI
                 _quantityText.text = slot.quantity > 1 ? slot.quantity.ToString() : "";
                 _quantityText.enabled = slot.quantity > 1;
             }
+        }
+
+        // Toggles the active-slot frame. Only hotbar slots are ever told to select (see UI_InventoryDisplay).
+        public void SetSelected(bool selected)
+        {
+            if (_selectionHighlight != null) _selectionHighlight.SetActive(selected);
         }
 
         public void OnPointerClick(PointerEventData eventData)

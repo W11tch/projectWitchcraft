@@ -13,12 +13,17 @@ namespace ProjectWitchcraft.Core
         [SerializeField] private AttackDefinition _attackDefinition;
         [Tooltip("Base swing rate for this weapon (attacks per second), before the wielder's AttackSpeed multiplier.")]
         [SerializeField] private float _baseAttacksPerSecond = 1f;
+        [Tooltip("Base damage this weapon deals. Replaces the player's base Damage stat while held; flat/additive/multiplicative affixes then stack on top.")]
+        [SerializeField] private float _baseDamage = 10f;
+        [SerializeField] private DamageType _damageType = DamageType.Physical;
 
         public bool IsTwoHanded => _isTwoHanded;
         public int MaxDurability => _maxDurability;
         public IReadOnlyList<EquipmentAffix> Affixes => _affixes;
         public AttackDefinition AttackDefinition => _attackDefinition;
         public float BaseAttacksPerSecond => _baseAttacksPerSecond;
+        public float BaseDamage => _baseDamage;
+        public DamageType DamageType => _damageType;
 
         public override float GetMaxDurability() => _maxDurability;
     }

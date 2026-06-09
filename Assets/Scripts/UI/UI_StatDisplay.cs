@@ -29,11 +29,11 @@ namespace ProjectWitchcraft.UI
         /// </summary>
         public void UpdateValue(float value)
         {
-            // You can customize formatting here
-            // ex with one decimal
-            // statValueText.text = value.ToString("F1");
-            // Actually shows an integrer
-            statValueText.text = Mathf.RoundToInt(value).ToString();
+            // Multiplier stats (e.g. Attack Speed, 1.0 = 100%) are flagged Percentage on their
+            // StatDefinition; everything else displays as a rounded integer.
+            statValueText.text = _statDef != null && _statDef.displayFormat == StatDisplayFormat.Percentage
+                ? Mathf.RoundToInt(value * 100f) + "%"
+                : Mathf.RoundToInt(value).ToString();
         }
 
         /// <summary>

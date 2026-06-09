@@ -82,14 +82,14 @@ namespace ProjectWitchcraft.Player
                 _animator.SetTrigger(def.AnimationTrigger);
 
             if (_swingRoutine != null) StopCoroutine(_swingRoutine);
-            _swingRoutine = StartCoroutine(SwingRoutine(def, windupDuration, activeWindow));
+            _swingRoutine = StartCoroutine(SwingRoutine(def, weapon.DamageType, windupDuration, activeWindow));
         }
 
         // Drives the attack over its active window: the overlap is re-checked each frame so the
         // hitbox tracks the player's live position, while committing to the facing locked at swing
         // start. Movement is slowed for the duration via a temporary MoveSpeed debuff. The window
         // length is derived from attack speed (see TryAttack).
-        private IEnumerator SwingRoutine(AttackDefinition def, float windupDuration, float activeWindow)
+        private IEnumerator SwingRoutine(AttackDefinition def, DamageType damageType, float windupDuration, float activeWindow)
         {
             _hitThisSwing.Clear();
 
@@ -117,7 +117,7 @@ namespace ProjectWitchcraft.Player
             float elapsed = 0f;
             do
             {
-                ResolveHits(def, baseDamage, swingRotation);
+                ResolveHits(def, baseDamage, damageType, swingRotation);
                 elapsed += Time.deltaTime;
                 yield return null;
             }
@@ -130,7 +130,7 @@ namespace ProjectWitchcraft.Player
         // Runs one frame's overlap, filters, and applies damage. The hit volume tracks the player's
         // live position but uses the locked swingRotation, so the swing follows movement without
         // re-aiming toward the mouse mid-swing.
-        private void ResolveHits(AttackDefinition def, float baseDamage, Quaternion swingRotation)
+        private void ResolveHits(AttackDefinition def, float baseDamage, DamageType damageType, Quaternion swingRotation)
         {
             Vector3 worldCenter  = transform.position + swingRotation * def.HitOffset;
             Vector3 swingForward = swingRotation * Vector3.forward;
@@ -211,10 +211,14 @@ namespace ProjectWitchcraft.Player
 
                 damageable.TakeDamage(new HitData
                 {
-                    Damage        = baseDamage * def.DamageMultiplier,
-                    Type          = def.DamageType,
+                    // baseDamage already resolves to weapon base (Override) + equipment flat/additive/
+                    // multiplicative affixes — see EquipmentManager.ApplyModifiers / CharacterStats.
+                    Damage        = baseDamage,
+                    Type          = damageType,
                     Source        = this,
-                    WorldPosition = col.bounds.center,
+                    // Anchor floating damage numbers above the enemy's head (collider top), not its
+                    // center. The damage number is the only reader of WorldPosition, so VFX are unaffected.
+                    WorldPosition = new Vector3(col.bounds.center.x, col.bounds.max.y, col.bounds.center.z),
                     Direction     = toEnemy.sqrMagnitude > 0f ? toEnemy.normalized : swingForward
                 });
             }

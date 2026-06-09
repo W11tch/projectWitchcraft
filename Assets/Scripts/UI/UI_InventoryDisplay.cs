@@ -21,20 +21,37 @@ namespace ProjectWitchcraft.UI
 
         private List<UI_InventorySlot> _hotbarSlotsUI = new List<UI_InventorySlot>();
         private List<UI_InventorySlot> _inventorySlotsUI = new List<UI_InventorySlot>();
+        private int _activeHotbarIndex = 0;
 
         private void OnEnable()
         {
             EventManager.AddListener<InventoryChangedEvent>(OnInventoryChanged);
+            EventManager.AddListener<ActiveHotbarSlotChangedEvent>(OnActiveHotbarSlotChanged);
             if (_hotbarSlotsUI.Count == 0)
             {
                 CreateSlots();
             }
             UpdateAllSlots();
+            UpdateActiveSlotHighlight();
         }
 
         private void OnDisable()
         {
             EventManager.RemoveListener<InventoryChangedEvent>(OnInventoryChanged);
+            EventManager.RemoveListener<ActiveHotbarSlotChangedEvent>(OnActiveHotbarSlotChanged);
+        }
+
+        private void OnActiveHotbarSlotChanged(ActiveHotbarSlotChangedEvent e)
+        {
+            _activeHotbarIndex = e.SlotIndex;
+            UpdateActiveSlotHighlight();
+        }
+
+        // Frames only the active hotbar slot. Safe to call before/after slots exist.
+        private void UpdateActiveSlotHighlight()
+        {
+            for (int i = 0; i < _hotbarSlotsUI.Count; i++)
+                _hotbarSlotsUI[i].SetSelected(i == _activeHotbarIndex);
         }
 
 

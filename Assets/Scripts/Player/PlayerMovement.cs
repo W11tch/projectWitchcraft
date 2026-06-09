@@ -12,7 +12,9 @@ namespace ProjectWitchcraft.Player
         private bool _isMovementFrozen = false;
 
         [Header("Movement Settings")]
-        [Tooltip("The StatDefinition asset that represents the player's move speed.")]
+        [Tooltip("Base movement speed in units/sec. The MoveSpeed stat multiplies this (1.0 = 100%).")]
+        [SerializeField] private float _baseMoveSpeed = 5f;
+        [Tooltip("The StatDefinition asset that represents the player's move speed (a multiplier).")]
         [SerializeField] private StatDefinition _moveSpeedStat;
         private float _gravity = -9.81f;
 
@@ -105,9 +107,9 @@ namespace ProjectWitchcraft.Player
 
             _playerVelocity.y += _gravity * Time.deltaTime;
 
-            // We now get the current move speed from the CharacterStats component every frame.
-            // This ensures any buffs or debuffs are applied in real-time.
-            float currentMoveSpeed = _characterStats.GetStatValue(_moveSpeedStat);
+            // MoveSpeed is a multiplier (1.0 = 100%) read every frame so buffs/debuffs apply in
+            // real-time; the tunable base speed (units/sec) lives here on the component.
+            float currentMoveSpeed = _baseMoveSpeed * _characterStats.GetStatValue(_moveSpeedStat);
             _characterController.Move(move * currentMoveSpeed * Time.deltaTime);
             _characterController.Move(_playerVelocity * Time.deltaTime);
         }

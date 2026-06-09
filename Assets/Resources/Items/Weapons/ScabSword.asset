@@ -25,4 +25,6 @@ MonoBehaviour:
     Value: 0.5
     Stage: 200
   _attackDefinition: {fileID: 11400000, guid: 4c80a841cba6c174ebe0fba1f521005a, type: 2}
-  _baseAttacksPerSecond: 1
+  _baseAttacksPerSecond: 1.5
+  _baseDamage: 10
+  _damageType: 0

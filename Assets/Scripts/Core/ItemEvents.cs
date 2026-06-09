@@ -15,6 +15,11 @@ namespace ProjectWitchcraft.Core
         public ItemInstance NewItem; // null when slot was cleared
     }
 
+    public struct ActiveHotbarSlotChangedEvent
+    {
+        public int SlotIndex;
+    }
+
     public struct ItemDroppedInWorldEvent
     {
         public ItemInstance itemInstance;

@@ -23,6 +23,11 @@ namespace ProjectWitchcraft.Core
 
         [Tooltip("The category this stat belongs to, used for UI grouping.")]
         public StatCategory category;
+
+        [Tooltip("How the stats panel formats this value. Percentage shows value*100 + \"%\" (use for multiplier stats like Attack Speed).")]
+        public StatDisplayFormat displayFormat = StatDisplayFormat.Integer;
     }
+
+    public enum StatDisplayFormat { Integer, Percentage }
 
 }

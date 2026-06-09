@@ -83,6 +83,7 @@ namespace ProjectWitchcraft.Player
             {
                 int slotIndex = keyNumber == 0 ? 9 : keyNumber - 1;
                 ActiveHotbarIndex = slotIndex;
+                EventManager.TriggerEvent(new ActiveHotbarSlotChangedEvent { SlotIndex = slotIndex });
                 RefreshActiveWeapon();
 
                 var inventoryManager = InventoryManager.Instance;

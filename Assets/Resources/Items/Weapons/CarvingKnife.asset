@@ -23,3 +23,5 @@ MonoBehaviour:
   _affixes: []
   _attackDefinition: {fileID: 11400000, guid: a40510054c8249af87743541f016149d, type: 2}
   _baseAttacksPerSecond: 2.5
+  _baseDamage: 6
+  _damageType: 0
