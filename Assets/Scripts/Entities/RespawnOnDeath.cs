@@ -4,17 +4,17 @@ using ProjectWitchcraft.Core;
 
 namespace ProjectWitchcraft.Entities
 {
-    public class TargetDummy : NPC
+    // Capability component: when this entity dies, it comes back to full health in place after a
+    // delay (instead of staying dead). Used by the target dummy; reusable for any practice/endless
+    // entity. Orthogonal to EntityPersistencePolicy.RespawnInPlace, which is about save/load restore.
+    [RequireComponent(typeof(HealthComponent))]
+    public class RespawnOnDeath : MonoBehaviour
     {
         [SerializeField] private float _respawnDelay = 2f;
 
         private HealthComponent _health;
 
-        protected override void Awake()
-        {
-            base.Awake();
-            _health = GetComponent<HealthComponent>();
-        }
+        private void Awake() => _health = GetComponent<HealthComponent>();
 
         private void OnEnable()  => EventManager.AddListener<DiedEvent>(OnDied);
         private void OnDisable() => EventManager.RemoveListener<DiedEvent>(OnDied);

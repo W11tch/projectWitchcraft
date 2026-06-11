@@ -21,3 +21,5 @@ The user is the game designer. Never make gameplay or design decisions unilatera
 - Only implement after explicit approval of a plan
 - Follow established patterns, do not break it for conveniency
 
+## CRITICAL: Beware of circular dependencies
+ when one assembly needs a fact from another, expose a primitive across the boundary, don't reach into a field whose type lives in a third assembly.

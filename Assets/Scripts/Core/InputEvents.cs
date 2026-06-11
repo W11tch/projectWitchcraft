@@ -5,4 +5,5 @@ namespace ProjectWitchcraft.Core
     public struct CancelActionTriggeredEvent { }
     public struct DestroyActionTriggeredEvent { }
     public struct InteractActionTriggeredEvent { }
+    public struct KillActionTriggeredEvent { }
 }

@@ -37,6 +37,12 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns the current instance without creating one. Null if it doesn't exist yet or has been
+    /// destroyed. Use this during teardown (OnDisable/OnDestroy) to avoid resurrecting a singleton.
+    /// </summary>
+    public static T InstanceIfExists => s_instance;
+
     protected virtual void Awake()
     {
         if (s_instance != null && s_instance != this)

@@ -86,6 +86,19 @@ namespace ProjectWitchcraft.Entities
             });
         }
 
+        // Sets health to an exact value, clamped to [0, MaxHealth]. Used by the save system to
+        // restore a Persistent entity's health on load. Fires HealedEvent so UI/health bars sync.
+        public void RestoreHealth(float value)
+        {
+            CurrentHealth = Mathf.Clamp(value, 0f, MaxHealth);
+            EventManager.TriggerEvent(new HealedEvent
+            {
+                NewHealth = CurrentHealth,
+                MaxHealth = MaxHealth,
+                Target = transform
+            });
+        }
+
         // Restores health to full regardless of alive state — use for respawning entities only.
         public void ResetHealth()
         {

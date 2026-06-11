@@ -32,3 +32,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 525e9f1440f0eb3488ee319c946bfd0c, type: 2}
   - {fileID: 11400000, guid: bdb5587653b1dea4a80dc75e13bd7822, type: 2}
   _tools: []
+  _entities:
+  - {fileID: 11400000, guid: d695bb0cd1662824d8f344fc51598e48, type: 2}

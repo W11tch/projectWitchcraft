@@ -13,12 +13,14 @@ namespace ProjectWitchcraft.Core
         [SerializeField] private List<EquipmentItemData> _equipment = new();
         [SerializeField] private List<WeaponItemData> _weapons = new();
         [SerializeField] private List<ToolItemData> _tools = new();
+        [SerializeField] private List<EntityDefinition> _entities = new();
 
         private Dictionary<string, ItemData> _itemsByGuid;
         private Dictionary<string, PlaceableItemData> _placeablesByGuid;
         private Dictionary<string, EquipmentItemData> _equipmentByGuid;
         private Dictionary<string, WeaponItemData> _weaponsByGuid;
         private Dictionary<string, ToolItemData> _toolsByGuid;
+        private Dictionary<string, EntityDefinition> _entitiesByGuid;
 
         public void Initialize()
         {
@@ -27,9 +29,10 @@ namespace ProjectWitchcraft.Core
             _equipmentByGuid = BuildDict<EquipmentItemData>(_equipment);
             _weaponsByGuid = BuildDict<WeaponItemData>(_weapons);
             _toolsByGuid = BuildDict<ToolItemData>(_tools);
+            _entitiesByGuid = BuildDict<EntityDefinition>(_entities);
         }
 
-        private Dictionary<string, T> BuildDict<T>(List<T> list) where T : ItemData
+        private Dictionary<string, T> BuildDict<T>(List<T> list) where T : GuidAsset
         {
             var dict = new Dictionary<string, T>(list.Count);
             foreach (var item in list)
@@ -78,6 +81,12 @@ namespace ProjectWitchcraft.Core
             return _toolsByGuid.TryGetValue(guid, out var t) ? t : null;
         }
 
+        public EntityDefinition GetEntityByGuid(string guid)
+        {
+            EnsureInitialized();
+            return _entitiesByGuid.TryGetValue(guid, out var e) ? e : null;
+        }
+
         private void EnsureInitialized()
         {
             if (_itemsByGuid == null) Initialize();
@@ -88,6 +97,7 @@ namespace ProjectWitchcraft.Core
         public IReadOnlyList<EquipmentItemData> AllEquipment => _equipment;
         public IReadOnlyList<WeaponItemData> AllWeapons => _weapons;
         public IReadOnlyList<ToolItemData> AllTools => _tools;
+        public IReadOnlyList<EntityDefinition> AllEntities => _entities;
 
         public IEnumerable<ItemData> AllItemsOfAllTypes
         {

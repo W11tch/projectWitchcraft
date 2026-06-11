@@ -7,10 +7,11 @@ namespace ProjectWitchcraft.Core
     [System.Serializable]
     public class SaveData
     {
-        public int version = 3;
+        public int version = 4;
         public PlayerSaveData player = new PlayerSaveData();
         public List<ObjectData> placedObjects = new List<ObjectData>();
         public List<WorldItemSaveData> worldItems = new List<WorldItemSaveData>();
+        public List<EntitySaveData> entities = new List<EntitySaveData>();
     }
 
     [System.Serializable]
@@ -64,6 +65,32 @@ namespace ProjectWitchcraft.Core
         public int visualRotationIndex;
         // Populated only when this placed object is a chest. Null otherwise.
         public ChestSaveData chest;
+
+        [JsonIgnore]
+        public Vector3 Position
+        {
+            get => new Vector3(px, py, pz);
+            set { px = value.x; py = value.y; pz = value.z; }
+        }
+
+        [JsonIgnore]
+        public Quaternion Rotation
+        {
+            get => new Quaternion(rx, ry, rz, rw);
+            set { rx = value.x; ry = value.y; rz = value.z; rw = value.w; }
+        }
+    }
+
+    // One spawned world entity (creature/character/plant/the dummy). Resolved to a prefab by
+    // definitionGuid through AssetRegistry on load. Transient-policy entities are never written here.
+    [System.Serializable]
+    public class EntitySaveData
+    {
+        public string definitionGuid;
+        public string uniqueId;
+        public float px, py, pz;
+        public float rx, ry, rz, rw;
+        public float currentHealth;
 
         [JsonIgnore]
         public Vector3 Position

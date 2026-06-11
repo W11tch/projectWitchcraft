@@ -11,9 +11,10 @@ GameObject:
   - component: {fileID: 3336264976555465827}
   - component: {fileID: 1595807854352403304}
   - component: {fileID: 2894198777031547478}
-  - component: {fileID: 2547718455691583527}
   - component: {fileID: 1871219083647650261}
   - component: {fileID: 5792170813114735513}
+  - component: {fileID: 8976770130903586337}
+  - component: {fileID: 3941713576320628281}
   m_Layer: 11
   m_Name: TargetDummy
   m_TagString: Untagged
@@ -65,21 +66,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ProjectWitchcraft.Factions::ProjectWitchcraft.Factions.FactionMember
   _faction: {fileID: 0}
---- !u!114 &2547718455691583527
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4613462143197905961}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2d9706104fa27fe48a61f9fc656e7073, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ProjectWitchcraft.Entities::ProjectWitchcraft.Entities.TargetDummy
-  _uniqueId: 
-  _definition: {fileID: 0}
-  _respawnDelay: 2
 --- !u!114 &1871219083647650261
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -116,6 +102,34 @@ CapsuleCollider:
   m_Height: 1.808
   m_Direction: 1
   m_Center: {x: 0, y: 0.854, z: 0}
+--- !u!114 &8976770130903586337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4613462143197905961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b737eda23f49874f9a53a01e27b1b6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ProjectWitchcraft.Entities::ProjectWitchcraft.Entities.Entity
+  _uniqueId: 
+  _definition: {fileID: 11400000, guid: d695bb0cd1662824d8f344fc51598e48, type: 2}
+  _persistencePolicy: 1
+--- !u!114 &3941713576320628281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4613462143197905961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 584b0c395951fde44af39982e9c0d8aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ProjectWitchcraft.Entities::ProjectWitchcraft.Entities.RespawnOnDeath
+  _respawnDelay: 2
 --- !u!1 &4793480462388104399
 GameObject:
   m_ObjectHideFlags: 0

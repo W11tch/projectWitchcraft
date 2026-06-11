@@ -144,6 +144,14 @@ namespace ProjectWitchcraft.Player
             }
         }
 
+        public void OnKillEntity(InputAction.CallbackContext context)
+        {
+            if (context.performed)
+            {
+                EventManager.TriggerEvent(new KillActionTriggeredEvent());
+            }
+        }
+
         public void OnPause(InputAction.CallbackContext context)
         {
             if (!context.performed) return;

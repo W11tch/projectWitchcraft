@@ -91,6 +91,10 @@ namespace ProjectWitchcraft.Managers
 
         public bool IsTileWalkable(Vector3 worldPosition) => GetGridData(worldPosition)?.groundObject != null;
 
+        // True when the cell at this position has an upper-level placed object. Returns a bool so
+        // callers outside the BuildingSystem assembly need no reference to PlaceableObject.
+        public bool HasUpperObject(Vector3 worldPosition) => GetGridData(worldPosition)?.upperObject != null;
+
         public Vector3 SnapToGridCenter(Vector3 worldPosition)
         {
             float x = Mathf.Floor(worldPosition.x / cellSize) * cellSize + cellSize * 0.5f;
