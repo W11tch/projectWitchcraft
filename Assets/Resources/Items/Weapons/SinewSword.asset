@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a469b34223c9454db29fb119aeed893, type: 3}
   m_Name: SinewSword
   m_EditorClassIdentifier: Core::ProjectWitchcraft.Core.WeaponItemData
+  _assetGuid: bdb5587653b1dea4a80dc75e13bd7822
   Name: Sinew sword
   Icon: {fileID: 21300000, guid: a7863c2317ba89346bfa12c168ada4c2, type: 3}
   maxStackSize: 1
-  description: 'A serpentine sword made from the tendons of a sinuous creature. '
-  _assetGuid: bdb5587653b1dea4a80dc75e13bd7822
+  description: 'A sinuous sword made from the tendons of an elongated creature. '
   _isTwoHanded: 0
   _maxDurability: 100
   _affixes: []
